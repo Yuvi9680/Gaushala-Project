@@ -34,15 +34,15 @@
                 <a href="#profile" class="nav-link mobile-only" data-page="profile" id="mobileProfileLink" style="display:none;"><i data-lucide="user"></i> प्रोफ़ाइल</a>
                 
                 <!-- Common Links -->
-                <a href="#home" class="nav-link active" data-page="home">मुखपृष्ठ (Home)</a>
-                <a href="#about" class="nav-link" data-page="about">हमारे बारे में (About Us)</a>
-                <a href="#donation" class="nav-link" data-page="donation">दान करें (Donate)</a>
-                <a href="#membership" class="nav-link" data-page="membership">सदस्यता (Membership)</a>
-                <a href="#events" class="nav-link" data-page="events">इवेंट्स (Events)</a>
-                <a href="#contact" class="nav-link" data-page="contact">संपर्क (Contact)</a>
+                <a href="#home" class="nav-link active" data-page="home" onclick="showPage('home')">मुखपृष्ठ (Home)</a>
+                <a href="#about" class="nav-link" data-page="about" onclick="showPage('about')">हमारे बारे में (About Us)</a>
+                <a href="#donation" class="nav-link" data-page="donation" onclick="showPage('donation')">दान करें (Donate)</a>
+                <a href="#membership" class="nav-link" data-page="membership" onclick="showPage('membership')">सदस्यता (Membership)</a>
+                <a href="#events" class="nav-link" data-page="events" onclick="showPage('events')">इवेंट्स (Events)</a>
+                <a href="#contact" class="nav-link" data-page="contact" onclick="showPage('contact')">संपर्क (Contact)</a>
                 
                 <!-- Mobile Auth Links -->
-                <a href="#login" class="nav-link mobile-only" data-page="login" id="mobileLoginLink"><i data-lucide="log-in"></i> Login/Signup</a>
+                <a href="#login" class="nav-link mobile-only" data-page="login" id="mobileLoginLink" onclick="showPage('login')"><i data-lucide="log-in"></i> Login/Signup</a>
                 <a href="#" class="nav-link mobile-only" onclick="logoutUser()" id="mobileLogoutLink" style="display:none;"><i data-lucide="log-out"></i> Logout</a>
 
             </nav>
@@ -149,11 +149,19 @@
                     <!-- Dynamic QR code will be generated here -->
                 </div>
 
+                <div class="bank-details-box">
+                    <h4 class="section-subtitle">बैंक खाते से दान करें</h4>
+                    <p><strong>खाता संख्या:</strong> 46870200000024</p>
+                    <p><strong>IFSC कोड:</strong> BARB0BRGBXX</p>
+                    <p class="mt-2 text-primary">पेमेंट के बाद, नीचे प्रमाण ज़रूर जमा करें।</p>
+                </div>
+
+
                 <h3 class="section-title mt-5">भुगतान प्रमाण (General Donation Proof)</h3>
                 <form id="donationForm">
                     <input type="text" id="donorName" placeholder="आपका नाम (English)" required>
                     <input type="tel" id="donorMobile" placeholder="मोबाइल नंबर (English)" required>
-                    <input type="text" id="transactionId" placeholder="12-अंकों का UPI ट्रांजेक्शन ID (English)" required>
+                    <input type="text" id="transactionId" placeholder="12-अंकों का UPI/Bank ट्रांजेक्शन ID (English)" required>
                     <label class="file-input">
                         <input type="file" id="screenshotUpload" accept="image/*" required>
                         <span><i data-lucide="upload"></i> स्क्रीनशॉट अपलोड करें</span>
@@ -196,12 +204,19 @@
                 <form id="membershipForm" style="display:none;" class="mt-4">
                     <div id="membershipQRCodeContainer" class="qr-container mt-4"></div>
                     
+                    <div class="bank-details-box mb-4">
+                        <h4 class="section-subtitle">बैंक खाते से भुगतान करें</h4>
+                        <p><strong>खाता संख्या:</strong> 46870200000024</p>
+                        <p><strong>IFSC कोड:</strong> BARB0BRGBXX</p>
+                    </div>
+
+
                     <h4 class="mt-4">सदस्यता विवरण और प्रमाण</h4>
                     <input type="hidden" id="memberAmount">
                     <input type="hidden" id="memberType">
 
                     <input type="text" id="memberDonorName" placeholder="आपका पूरा नाम (English)" required>
-                    <input type="text" id="memberTransactionId" placeholder="12-अंकों का UPI ट्रांजेक्शन ID (English)" required>
+                    <input type="text" id="memberTransactionId" placeholder="12-अंकों का UPI/Bank ट्रांजेक्शन ID (English)" required>
                     
                     <label class="file-input mt-3">
                         <input type="file" id="paymentScreenshotUploadMember" accept="image/*" required>
@@ -252,7 +267,7 @@
                 <h3 class="section-title">हमारा मिशन</h3>
                 <p>गौशाला सेवा समिति सिंगनोर का उद्देश्य बेसहारा और बीमार गौ माता को आश्रय, पोषण और चिकित्सा देखभाल प्रदान करना है। हमारा मिशन भारतीय संस्कृति और धर्म के मूल्यों को आगे बढ़ाना है, जहाँ गाय को माँ का दर्जा दिया जाता है।</p>
                 <h3 class="section-title mt-4">गौशाला की स्थापना</h3>
-                <p>इस गौशाला की स्थापना कुछ समर्पित गांव के सदस्यों द्वारा [वर्ष] में की गई थी, जिनका एक ही सपना था: हर गौ माता सुरक्षित रहे। आज, हम आपके सहयोग से सैकड़ों गायों की सेवा कर रहे हैं।</p>
+                <p>इस गौशाला की स्थापना कुछ समर्पित गांव के सदस्यों द्वारा 2018 में की गई थी, जिनका एक ही सपना था: हर गौ माता सुरक्षित रहे। आज, हम आपके सहयोग से सैकड़ों गायों की सेवा कर रहे हैं।</p>
             </div>
         </section>
 
@@ -283,7 +298,7 @@
             <div class="grid-2-col">
                 <div class="section-card">
                     <h3 class="section-title">हमसे सीधे संपर्क करें</h3>
-                    <form id="contactForm">
+                    <form id="contactForm" onsubmit="handleContactFormSubmission(event)">
                         <input type="text" id="contactName" placeholder="आपका नाम (English)" required>
                         <input type="email" id="contactEmail" placeholder="आपका ईमेल (English)" required>
                         <textarea id="contactMessage" placeholder="आपका संदेश (Message)" rows="5" required></textarea>
@@ -341,24 +356,24 @@
         <div class="footer-content">
             <div class="footer-col">
                 <h4>सेवाएं</h4>
-                <a href="#donation" data-page="donation">दान करें</a>
-                <a href="#membership" data-page="membership">सदस्यता लें</a>
-                <a href="#events" data-page="events">इवेंट्स</a>
-                <a href="#contact" data-page="contact">संपर्क करें</a>
+                <a href="#donation" data-page="donation" onclick="showPage('donation')">दान करें</a>
+                <a href="#membership" data-page="membership" onclick="showPage('membership')">सदस्यता लें</a>
+                <a href="#events" data-page="events" onclick="showPage('events')">इवेंट्स</a>
+                <a href="#contact" data-page="contact" onclick="showPage('contact')">संपर्क करें</a>
             </div>
             <div class="footer-col">
                 <h4>हमारी संस्था</h4>
-                <a href="#about" data-page="about">हमारे बारे में</a>
-                <a href="#work-gallery" data-page="work-gallery">कार्य गैलरी</a>
-                <a href="#">ब्लॉग्स</a>
-                <a href="#donors-list" data-page="donors-list">दानकर्ता सूची</a>
+                <a href="#about" data-page="about" onclick="showPage('about')">हमारे बारे में</a>
+                <a href="#work-gallery" data-page="work-gallery" onclick="showPage('work-gallery')">कार्य गैलरी</a>
+                <a href="#" onclick="alert('ब्लॉग पेज यहाँ खुलेगा')">ब्लॉग्स</a>
+                <a href="#donors-list" data-page="donors-list" onclick="showPage('donors-list')">दानकर्ता सूची</a>
             </div>
             <div class="footer-col">
                 <h4>प्रपत्र (Forms)</h4>
-                <a href="#donation" data-page="donation">दान फॉर्म</a>
-                <a href="#membership" data-page="membership">सदस्यता फॉर्म</a>
+                <a href="#donation" data-page="donation" onclick="showPage('donation')">दान फॉर्म</a>
+                <a href="#membership" data-page="membership" onclick="showPage('membership')">सदस्यता फॉर्म</a>
                 <a href="#" onclick="alert('स्वयंसेवक फॉर्म यहाँ खुलेगा')">स्वयंसेवक फॉर्म</a>
-                <a href="#profile" data-page="profile">प्रोफ़ाइल</a> 
+                <a href="#profile" data-page="profile" onclick="showPage('profile')">प्रोफ़ाइल</a> 
             </div>
             <div class="footer-col">
                 <h4>कानूनी दस्तावेज़</h4>
