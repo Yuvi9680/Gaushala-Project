@@ -31,7 +31,7 @@ try {
 // Global Variables
 let currentUserId = null;
 let currentMembershipStatus = 'None';
-// NEW VPA based on Bank Account Details: Account No.: 46870200000024, IFSC: BARB0BRGBXX
+// VPA based on Bank Account Details: Account No.: 46870200000024, IFSC: BARB0BRGBXX
 const VPA = "46870200000024@BARB0BRGBXX.bank"; 
 
 
@@ -39,16 +39,20 @@ const VPA = "46870200000024@BARB0BRGBXX.bank";
 // 2. AUTHENTICATION (Login, Signup, Google)
 // --------------------------------------------------------------------------
 
-// --- A. Email/Password Signup/Login ---
+// --- A. Email/Password Signup/Login (FIXED DUPLICATE USER) ---
 
 window.handleSignup = async function(e) {
     e.preventDefault();
     const name = document.getElementById('signupName').value;
     const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
+    
+    // Disable button to prevent double-click duplicate creation attempts
+    const signupBtn = e.target.querySelector('button[type="submit"]');
+    signupBtn.disabled = true;
 
     try {
-        // FIX: Check if the user already exists to prevent duplicate creation attempts
+        // FIX: Check if the user already exists (Prevents duplicate creation attempts)
         const methods = await auth.fetchSignInMethodsForEmail(email);
         if (methods && methods.length > 0) {
             alert("यह ईमेल पहले से पंजीकृत है। कृपया लॉगिन करें या किसी अन्य ईमेल का उपयोग करें।");
@@ -74,6 +78,8 @@ window.handleSignup = async function(e) {
         showPage('profile');
     } catch (error) {
         alert("पंजीकरण में त्रुटि: " + error.message);
+    } finally {
+        signupBtn.disabled = false;
     }
 }
 
@@ -212,7 +218,7 @@ window.logoutUser = async function() {
 // 3. SINGLE PAGE APPLICATION (SPA) NAVIGATION & UI LOGIC
 // --------------------------------------------------------------------------
 
-// FIX: Function to show the Login Modal (Working activation)
+// FIX: Function to show the Login Modal
 window.showLoginModal = function() {
     const modal = document.getElementById('loginModal');
     modal.classList.add('active');
@@ -307,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageId = window.location.hash.substring(1) || 'home';
     showPage(pageId);
     
-    // Attach event listeners to forms
     document.getElementById('loginForm').addEventListener('submit', window.handleLogin);
     document.getElementById('signupForm').addEventListener('submit', window.handleSignup);
     document.getElementById('membershipForm').addEventListener('submit', window.handleMembershipSubmission);
@@ -592,10 +597,9 @@ async function loadUserProfile(uid) {
 
     // Edit Profile Modal function
     window.openEditProfileModal = function() {
-        // Get user data directly from Firebase Auth or RTDB (assuming RTDB is faster for these small values)
         profileRef.once('value', (snapshot) => {
             const user = snapshot.val();
-            const newName = prompt("Enter new Name:", user.name || '');
+            const newName = prompt("Enter new Name:", firebase.auth().currentUser.displayName || '');
             const newMobile = prompt("Enter new Mobile:", user.mobile || '');
             const newAddress = prompt("Enter new Address:", user.address || '');
 
@@ -642,7 +646,7 @@ async function loadDonationHistory(uid) {
 
 
 // --------------------------------------------------------------------------
-// 7. DYNAMIC CONTENT LOADING (Top Donors & Contact Form Submission)
+// 7. DYNAMIC CONTENT LOADING (Top Donors)
 // --------------------------------------------------------------------------
 
 function loadTopDonors() {
