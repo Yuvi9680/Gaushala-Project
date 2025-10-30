@@ -244,11 +244,95 @@
         </section>
 
         <!-- F. PLACEHOLDER SECTIONS -->
-        <section id="about" class="page-section"><h2 class="page-title">हमारे बारे में (About Us)</h2><div class="section-card">गौशाला की कहानी यहाँ आएगी।</div></section>
-        <section id="events" class="page-section"><h2 class="page-title">इवेंट्स (Events)</h2><div class="section-card" id="eventSnippet">आगामी इवेंट्स यहाँ दिखाई देंगे।</div></section>
-        <section id="contact" class="page-section"><h2 class="page-title">संपर्क (Contact)</h2><div class="section-card">संपर्क फॉर्म और विवरण यहाँ आएगा।</div></section>
-        <section id="donors-list" class="page-section"><h2 class="page-title">सभी दानकर्ता</h2><div class="section-card">सभी दानकर्ताओं की सूची और फ़िल्टरिंग यहाँ होगी।</div></section>
-        <section id="work-gallery" class="page-section"><h2 class="page-title">कार्य गैलरी</h2><div class="section-card">गौशाला में सेवा कार्यों की तस्वीरें यहाँ होंगी।</div></section>
+        
+        <!-- ABOUT US -->
+        <section id="about" class="page-section">
+            <h2 class="page-title">हमारे बारे में (About Us)</h2>
+            <div class="section-card">
+                <h3 class="section-title">हमारा मिशन</h3>
+                <p>गौशाला सेवा समिति सिंगनोर का उद्देश्य बेसहारा और बीमार गौ माता को आश्रय, पोषण और चिकित्सा देखभाल प्रदान करना है। हमारा मिशन भारतीय संस्कृति और धर्म के मूल्यों को आगे बढ़ाना है, जहाँ गाय को माँ का दर्जा दिया जाता है।</p>
+                <h3 class="section-title mt-4">गौशाला की स्थापना</h3>
+                <p>इस गौशाला की स्थापना कुछ समर्पित गांव के सदस्यों द्वारा [वर्ष] में की गई थी, जिनका एक ही सपना था: हर गौ माता सुरक्षित रहे। आज, हम आपके सहयोग से सैकड़ों गायों की सेवा कर रहे हैं।</p>
+            </div>
+        </section>
+
+        <!-- EVENTS -->
+        <section id="events" class="page-section">
+            <h2 class="page-title">आगामी इवेंट्स (Events)</h2>
+            <div class="section-card">
+                <div id="eventList">
+                    <div class="event-card">
+                        <h4>मासिक गौ पूजन समारोह</h4>
+                        <p><strong>दिनांक:</strong> प्रत्येक माह का पहला रविवार</p>
+                        <p><strong>समय:</strong> सुबह 10:00 बजे</p>
+                        <p>गौ माता का सामूहिक पूजन और भंडारा। सभी दानकर्ता और सदस्य सादर आमंत्रित हैं।</p>
+                    </div>
+                    <div class="event-card mt-4">
+                        <h4>स्वयंसेवक सफाई अभियान</h4>
+                        <p><strong>दिनांक:</strong> 15 दिसंबर, 2025</p>
+                        <p><strong>समय:</strong> सुबह 8:00 बजे</p>
+                        <p>गौशाला परिसर की साफ-सफाई के लिए विशेष श्रमदान।</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section id="contact" class="page-section">
+            <h2 class="page-title">संपर्क (Contact Us)</h2>
+            <div class="grid-2-col">
+                <div class="section-card">
+                    <h3 class="section-title">हमसे सीधे संपर्क करें</h3>
+                    <form id="contactForm">
+                        <input type="text" id="contactName" placeholder="आपका नाम (English)" required>
+                        <input type="email" id="contactEmail" placeholder="आपका ईमेल (English)" required>
+                        <textarea id="contactMessage" placeholder="आपका संदेश (Message)" rows="5" required></textarea>
+                        <button type="submit" class="btn btn-primary w-full">संदेश भेजें</button>
+                    </form>
+                </div>
+                <div class="section-card">
+                    <h3 class="section-title">गौशाला का पता</h3>
+                    <p><i data-lucide="map-pin"></i> सिंगनोर गाँव, [ज़िला], [राज्य], भारत।</p>
+                    <h3 class="section-title mt-4">फोन और ईमेल</h3>
+                    <p><i data-lucide="phone"></i> मुख्य सदस्य: +91 98765 43210</p>
+                    <p><i data-lucide="mail"></i> Email: goshala.singnor@email.com</p>
+                    <div style="height: 200px; background: #eee; border-radius: 8px; margin-top: 15px;">
+                        <p class="text-center pt-5">Google Map Embed Area</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DONORS LIST -->
+        <section id="donors-list" class="page-section">
+            <h2 class="page-title">सभी दानकर्ता सूची</h2>
+            <div class="section-card">
+                <p>यह पृष्ठ उन सभी दानकर्ताओं को समर्पित है जिन्होंने गौ माता की सेवा में योगदान दिया है।</p>
+                <div class="filter-controls mt-4">
+                    <button class="btn btn-secondary btn-sm">Filter by Type (General)</button>
+                    <button class="btn btn-secondary btn-sm">Filter by Amount</button>
+                </div>
+                <div id="fullDonorsList" class="mt-4">
+                    <p>दानकर्ताओं की पूरी सूची (गुप्त दान को छोड़कर) यहाँ प्रदर्शित की जाएगी, जिसमें फ़िल्टर और पेजिनेशन शामिल होगा।</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- WORK GALLERY -->
+        <section id="work-gallery" class="page-section">
+            <h2 class="page-title">कार्य गैलरी और पारदर्शिता</h2>
+            <div class="section-card">
+                <h3 class="section-title">सेवा कार्य की झलक</h3>
+                <div class="grid-2-col">
+                    <div class="gallery-item" style="height: 200px; background: #f0f0f0; border-radius: 8px;"><p class="text-center pt-5">चारा खिलाना (Feeding)</p></div>
+                    <div class="gallery-item" style="height: 200px; background: #f0f0f0; border-radius: 8px;"><p class="text-center pt-5">चिकित्सा देखभाल (Medical Care)</p></div>
+                    <div class="gallery-item" style="height: 200px; background: #f0f0f0; border-radius: 8px;"><p class="text-center pt-5">स्वयंसेवक श्रमदान (Volunteer Work)</p></div>
+                    <div class="gallery-item" style="height: 200px; background: #f0f0f0; border-radius: 8px;"><p class="text-center pt-5">आश्रय निर्माण (Shelter Construction)</p></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Legal Docs are separate HTML files and linked in Footer -->
 
     </main>
     
@@ -274,7 +358,7 @@
                 <a href="#donation" data-page="donation">दान फॉर्म</a>
                 <a href="#membership" data-page="membership">सदस्यता फॉर्म</a>
                 <a href="#" onclick="alert('स्वयंसेवक फॉर्म यहाँ खुलेगा')">स्वयंसेवक फॉर्म</a>
-                <a href="#profile" data-page="profile">प्रोफ़ाइल</a> <!-- Added Profile Link -->
+                <a href="#profile" data-page="profile">प्रोफ़ाइल</a> 
             </div>
             <div class="footer-col">
                 <h4>कानूनी दस्तावेज़</h4>
@@ -292,7 +376,8 @@
     <!-- 4. LOGIN/SIGNUP MODAL (The Authentication Center) -->
     <div id="loginModal" class="modal-overlay">
         <div class="auth-card animated-form">
-            <button class="modal-close-btn" onclick="hideLoginModal()">&times;</button>
+            <!-- FIX: Cross button now correctly closes the modal -->
+            <button class="modal-close-btn" onclick="hideLoginModal()">&times;</button> 
             <div class="auth-tabs">
                 <!-- Tabs for Login and Signup -->
                 <button class="tab-button active" onclick="switchAuthTab('login')">लॉगिन (Login)</button>
