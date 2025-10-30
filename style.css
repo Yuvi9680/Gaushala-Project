@@ -52,7 +52,7 @@ body {
 }
 
 /* Card Styling */
-.section-card, .profile-card, .auth-card {
+.section-card, .profile-card, .auth-card, .donation-item {
     background: var(--color-surface);
     padding: 25px;
     border-radius: 12px;
@@ -251,6 +251,25 @@ input:focus {
     border: none;
     cursor: pointer;
     padding: 5px;
+}
+
+/* Updated Profile Navigation Item */
+.profile-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+.profile-photo-nav {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
+    object-fit: cover;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -486,11 +505,6 @@ input:focus {
 .divider::before { left: 0; }
 .divider::after { right: 0; }
 
-.social-auth-group button {
-    justify-content: start;
-    padding: 12px;
-}
-
 /* Premium Badge */
 .premium-badge {
     background: gold;
@@ -504,13 +518,26 @@ input:focus {
     margin-bottom: 15px;
 }
 
+.profile-photo-large-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-photo-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--color-secondary);
+    object-fit: cover;
+}
+
+
 .non-member-status {
     margin-bottom: 15px;
     color: var(--color-light-text);
 }
 .status-indicator.text-primary { color: var(--color-primary); font-weight: 600; }
 .status-indicator.text-secondary { color: var(--color-secondary); font-weight: 600; }
-
 
 /* Footer */
 #footer {
@@ -609,6 +636,17 @@ input:focus {
     .auth-buttons {
         display: none; 
     }
+    #profileBtnContainer {
+        /* Profile and Logout buttons for mobile menu */
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        display: flex !important; /* Force display when JS hides original desktop buttons */
+        z-index: 1001;
+        gap: 10px;
+        opacity: 0;
+        pointer-events: none;
+    }
 
     /* Contact Strip */
     .contact-strip {
@@ -626,4 +664,4 @@ input:focus {
         flex-basis: 100%;
         min-width: auto;
     }
-}
+                          }
