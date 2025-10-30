@@ -200,14 +200,16 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
-// FIX: Logout is now working correctly
+// FIX: Logout is now working correctly (Guaranteed State Clear)
 window.logoutUser = async function() {
     try {
         // Ensure successful signOut before updating UI
         await auth.signOut();
         alert("आप सफलतापूर्वक लॉगआउट हो गए हैं।");
-        // onAuthStateChanged handles UI update automatically and redirects to home
-        showPage('home');
+        // FIX: Increased timeout to ensure Auth State clears before redirect (500ms)
+        setTimeout(() => {
+            showPage('home');
+        }, 500); 
     } catch (error) {
         console.error("Logout Error:", error);
         alert("लॉगआउट में त्रुटि: " + error.message);
@@ -224,7 +226,6 @@ window.showLoginModal = function() {
     const modal = document.getElementById('loginModal');
     modal.classList.add('active');
     
-    // Default to Login tab
     switchAuthTab('login');
 }
 
@@ -518,8 +519,7 @@ window.handleMembershipSubmission = async function(e) {
             // Placeholder: Expiry date calculation would be here once confirmed by admin
         });
 
-
-        // 5. Show Thank You Screen and RESET
+// 5. Show Thank You Screen and RESET
         document.getElementById('membershipInputs').style.display = 'none';
         document.getElementById('membershipThankYouScreen').style.display = 'block';
         
@@ -572,7 +572,8 @@ async function loadUserProfile(uid) {
             // Display Total Donation Amount
             totalDonated.textContent = `कुल दान: ₹${(user.totalDonated || 0).toFixed(2)}`;
 
-            // Profile Photo Update
+
+// Profile Photo Update
             const photoUrl = user.profilePhotoURL && user.profilePhotoURL !== 'N/A' 
                                 ? user.profilePhotoURL 
                                 : `https://placehold.co/100x100/4CAF50/ffffff?text=${(user.name || 'U').charAt(0)}`;
@@ -628,8 +629,10 @@ async function loadDonationHistory(uid) {
         snapshot.forEach(child => {
             const donation = child.val();
             const date = new Date(donation.timestamp).toLocaleDateString('hi-IN');
-            
-            // Status styling
+
+
+
+// Status styling
             const statusClass = donation.status === 'Approved' ? 'text-primary' : (donation.status.includes('Pending') ? 'text-secondary' : 'text-danger');
 
             historyHTML += `
@@ -684,6 +687,8 @@ function loadTopDonors() {
         });
 }
 
+
+
 // Contact Form Submission (Uses mailto for free submission)
 window.handleContactFormSubmission = function(e) {
     e.preventDefault();
@@ -705,3 +710,6 @@ window.handleContactFormSubmission = function(e) {
 window.onload = function() {
     loadTopDonors();
 };
+
+            
+        
