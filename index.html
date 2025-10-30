@@ -30,23 +30,24 @@
             </div>
             
             <nav id="mainNav">
-                <!-- Data-page attribute is crucial for navigation logic -->
+                <!-- Mobile Menu: Profile Link Added -->
+                <a href="#profile" class="nav-link mobile-only" data-page="profile" id="mobileProfileLink" style="display:none;"><i data-lucide="user"></i> प्रोफ़ाइल</a>
                 <a href="#home" class="nav-link active" data-page="home">मुखपृष्ठ (Home)</a>
                 <a href="#about" class="nav-link" data-page="about">हमारे बारे में (About Us)</a>
                 <a href="#donation" class="nav-link" data-page="donation">दान करें (Donate)</a>
                 <a href="#membership" class="nav-link" data-page="membership">सदस्यता (Membership)</a>
                 <a href="#events" class="nav-link" data-page="events">इवेंट्स (Events)</a>
                 <a href="#contact" class="nav-link" data-page="contact">संपर्क (Contact)</a>
+                <a href="#login" class="nav-link mobile-only" data-page="login" id="mobileLoginLink"><i data-lucide="log-in"></i> Login/Signup</a>
+                <a href="#" class="nav-link mobile-only" onclick="logoutUser()" id="mobileLogoutLink" style="display:none;"><i data-lucide="log-out"></i> Logout</a>
+
             </nav>
 
             <div class="auth-buttons">
-                <!-- 
-                    सुधार: Login/Signup को एक बटन में रखा गया है। 
-                    प्रोफ़ाइल बटन में अब फोटो प्लेसहोल्डर शामिल है।
-                -->
-                <button id="loginBtn" class="btn btn-secondary" onclick="showPage('login')">Login/Signup</button>
+                <!-- Desktop Buttons: Login/Profile/Logout -->
+                <button id="loginBtn" class="btn btn-secondary desktop-only" onclick="showPage('login')">Login/Signup</button>
                 
-                <div id="profileBtnContainer" style="display: none;">
+                <div id="profileBtnContainer" class="desktop-only" style="display: none;">
                     <div class="profile-nav-item" onclick="showPage('profile')">
                         <img id="profilePhotoNav" src="https://placehold.co/36x36/4CAF50/ffffff?text=U" alt="Profile Photo" class="profile-photo-nav">
                         <span id="profileNameNav">Profile</span>
@@ -64,9 +65,9 @@
 
     <!-- 2. Main Content Container -->
     <main id="appContainer">
-
         <!-- A. HOME SECTION -->
         <section id="home" class="page-section active">
+            <!-- Content remains the same -->
             <div class="hero-section">
                 <h1 class="hero-title">गौशाला सेवा समिति सिंगनोर</h1>
                 <p class="hero-subtitle">गौ माता की सेवा में आपका स्वागत है। आपके सहयोग से ही यह धर्म कार्य संभव है।</p>
@@ -75,7 +76,7 @@
                 </button>
             </div>
             
-            <!-- Contact Strip (Location, Email, Phone) -->
+            <!-- Contact Strip -->
             <div class="contact-strip animated-form">
                 <a href="https://maps.google.com/?q=गौशाला सिंगनोर" target="_blank" class="contact-item">
                     <i data-lucide="map-pin"></i> सिंगनोर, गौशाला
@@ -91,7 +92,7 @@
                 </a>
             </div>
 
-            <!-- Top Donors Slider (Moving Animation) -->
+            <!-- Top Donors Slider -->
             <div class="section-card">
                 <h2 class="section-title">शीर्ष दानकर्ता (Top Donors)</h2>
                 <div id="topDonorsSlider" class="donor-slider">
@@ -102,7 +103,7 @@
                 </div>
             </div>
 
-            <!-- Content Snippets (Load More Sections) -->
+            <!-- Content Snippets -->
             <div class="grid-2-col">
                 <div class="section-card animated-form">
                     <h3 class="section-title">हमारे कार्य</h3>
@@ -115,12 +116,12 @@
                     <button class="btn btn-primary btn-sm mt-3" onclick="showPage('events')">सभी इवेंट्स</button>
                 </div>
             </div>
-
         </section>
 
         <!-- B. DONATION SECTION -->
         <section id="donation" class="page-section">
             <h2 class="page-title">दान करें (Donate)</h2>
+            <!-- Content remains the same -->
             <div id="thankYouScreen" class="thankyou-screen" style="display: none;">
                 <div class="success-animation"></div>
                 <h2>धन्यवाद!</h2>
@@ -160,6 +161,7 @@
         <!-- C. MEMBERSHIP SECTION -->
         <section id="membership" class="page-section">
             <h2 class="page-title">सदस्यता (Premium Membership)</h2>
+            <!-- Content remains the same -->
             <div id="membershipThankYouScreen" class="thankyou-screen" style="display: none;">
                 <div class="success-animation"></div>
                 <h2>सदस्यता अनुरोध सफलतापूर्वक जमा!</h2>
@@ -212,45 +214,9 @@
             </div>
         </section>
 
-        <!-- D. LOGIN/SIGNUP SECTION (Unified Auth Center - Professional Look) -->
-        <section id="login" class="page-section auth-center">
-            <div class="auth-card animated-form">
-                <div class="auth-tabs">
-                    <!-- Tabs for Login and Signup -->
-                    <button class="tab-button active" onclick="switchAuthTab('login')">लॉगिन (Login)</button>
-                    <button class="tab-button" onclick="switchAuthTab('signup')">साइनअप (Signup)</button>
-                </div>
-                
-                <!-- LOGIN TAB CONTENT -->
-                <div id="loginTabContent" class="auth-content active">
-                    <form id="loginForm" onsubmit="handleLogin(event)">
-                        <input type="email" id="loginEmail" placeholder="Email (English)" required>
-                        <input type="password" id="loginPassword" placeholder="Password (English)" required>
-                        <button type="submit" class="btn btn-primary w-full mt-3">Login</button>
-                        <p class="text-center mt-2"><a href="#" onclick="handlePasswordReset()">पासवर्ड भूल गए?</a></p>
-                    </form>
-                    
-                    <div class="divider">OR</div>
-                    
-                    <button class="btn btn-secondary w-full" onclick="signInWithGoogle()">
-                        <i data-lucide="chrome"></i> Google से लॉगिन
-                    </button>
-                </div>
-                
-                <!-- SIGNUP TAB CONTENT -->
-                <div id="signupTabContent" class="auth-content">
-                    <form id="signupForm" onsubmit="handleSignup(event)">
-                        <input type="text" id="signupName" placeholder="पूरा नाम (English)" required>
-                        <input type="email" id="signupEmail" placeholder="Email (English)" required>
-                        <input type="password" id="signupPassword" placeholder="Password (English)" required>
-                        <button type="submit" class="btn btn-primary w-full mt-3">Sign Up</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
         <!-- E. PROFILE SECTION -->
         <section id="profile" class="page-section">
+            <!-- Content remains the same -->
             <h2 class="page-title">प्रोफ़ाइल (Profile)</h2>
             <div class="grid-2-col">
                 <div class="profile-card animated-form">
@@ -286,6 +252,7 @@
     <!-- 3. Footer (Universal) -->
     <footer id="footer">
         <div class="footer-content">
+            <!-- Content remains the same -->
             <div class="footer-col">
                 <h4>सेवाएं</h4>
                 <a href="#donation" data-page="donation">दान करें</a>
@@ -320,9 +287,47 @@
         </div>
     </footer>
 
+    <!-- 4. LOGIN/SIGNUP MODAL (Hidden by default) -->
+    <div id="loginModal" class="modal-overlay" style="display: none;">
+        <div class="auth-card animated-form">
+            <button class="modal-close-btn" onclick="hideLoginModal()">&times;</button>
+            <div class="auth-tabs">
+                <!-- Tabs for Login and Signup -->
+                <button class="tab-button active" onclick="switchAuthTab('login')">लॉगिन (Login)</button>
+                <button class="tab-button" onclick="switchAuthTab('signup')">साइनअप (Signup)</button>
+            </div>
+            
+            <!-- LOGIN TAB CONTENT -->
+            <div id="loginTabContent" class="auth-content active">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <input type="email" id="loginEmail" placeholder="Email (English)" required>
+                    <input type="password" id="loginPassword" placeholder="Password (English)" required>
+                    <button type="submit" class="btn btn-primary w-full mt-3">Login</button>
+                    <p class="text-center mt-2"><a href="#" onclick="handlePasswordReset()">पासवर्ड भूल गए?</a></p>
+                </form>
+                
+                <div class="divider">OR</div>
+                
+                <button class="btn btn-secondary w-full" onclick="signInWithGoogle()">
+                    <i data-lucide="chrome"></i> Google से लॉगिन
+                </button>
+            </div>
+            
+            <!-- SIGNUP TAB CONTENT -->
+            <div id="signupTabContent" class="auth-content">
+                <form id="signupForm" onsubmit="handleSignup(event)">
+                    <input type="text" id="signupName" placeholder="पूरा नाम (English)" required>
+                    <input type="email" id="signupEmail" placeholder="Email (English)" required>
+                    <input type="password" id="signupPassword" placeholder="Password (English)" required>
+                    <button type="submit" class="btn btn-primary w-full mt-3">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Your Main Script File -->
     <script src="script.js"></script>
 </body>
 </html>
 
-    
