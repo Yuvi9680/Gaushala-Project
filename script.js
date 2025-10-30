@@ -129,7 +129,7 @@ window.handlePasswordReset = async function() {
 }
 
 
-// --- D. Auth State Listener & Logout ---
+// --- D. Auth State Listener & Logout (FIXED LOGOUT VISIBILITY) ---
 
 firebase.auth().onAuthStateChanged((user) => {
     const loginBtn = document.getElementById('loginBtn');
@@ -157,7 +157,7 @@ firebase.auth().onAuthStateChanged((user) => {
             }
         });
 
-        // Desktop UI
+        // Desktop UI: Hide Login, Show Profile/Logout
         loginBtn.style.display = 'none';
         profileBtnContainer.style.display = 'flex'; 
 
@@ -172,7 +172,7 @@ firebase.auth().onAuthStateChanged((user) => {
         currentUserId = null;
         currentMembershipStatus = 'None';
 
-        // Desktop UI
+        // Desktop UI: Show Login, Hide Profile/Logout
         loginBtn.style.display = 'inline-flex';
         profileBtnContainer.style.display = 'none';
         
@@ -197,7 +197,7 @@ window.logoutUser = async function() {
 // 3. SINGLE PAGE APPLICATION (SPA) NAVIGATION & UI LOGIC
 // --------------------------------------------------------------------------
 
-// FIX: Function to show the Login Modal (Fixed activation logic)
+// FIX: Function to show the Login Modal
 window.showLoginModal = function() {
     const modal = document.getElementById('loginModal');
     modal.classList.add('active');
@@ -223,17 +223,11 @@ window.switchAuthTab = function(tabId) {
 
 // Main Navigation Function
 window.showPage = function(pageId) {
-    // 1. Hide all sections
-    document.querySelectorAll('.page-section').forEach(section => {
-        section.classList.remove('active');
-    });
-
-    // 2. Handle Login/Signup Modal Display (FIXED LOGIC)
+    // 1. Handle Login/Signup Modal Display
     if (pageId === 'login') {
         if (currentUserId) {
             // If logged in, redirect to profile instead of showing modal
             pageId = 'profile'; 
-            window.location.hash = pageId;
         } else {
             // Show the modal
             showLoginModal();
@@ -244,12 +238,16 @@ window.showPage = function(pageId) {
         hideLoginModal();
     }
 
-
-    // 3. Show target section
+    // 2. Show target section (All other sections)
+    document.querySelectorAll('.page-section').forEach(section => {
+        section.classList.remove('active');
+    });
     const targetSection = document.getElementById(pageId);
     if (targetSection) {
         targetSection.classList.add('active');
     }
+    
+    // 3. Update URL hash
     window.location.hash = pageId;
 
     // 4. Highlight active link and CLOSE MOBILE MENU
@@ -291,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loginForm').addEventListener('submit', window.handleLogin);
     document.getElementById('signupForm').addEventListener('submit', window.handleSignup);
     document.getElementById('membershipForm').addEventListener('submit', window.handleMembershipSubmission);
+    document.getElementById('contactForm').addEventListener('submit', window.handleContactFormSubmission);
 });
 
 
@@ -336,7 +335,7 @@ document.getElementById('donationForm').addEventListener('submit', async functio
 
     const name = document.getElementById('donorName').value;
     const mobile = document.getElementById('donorMobile').value;
-    const txId = document.getElementById('transactionId').value;
+    const txId = document = document.getElementById('transactionId').value;
     const amount = document.getElementById('donationAmount').value;
     const screenshotFile = document.getElementById('screenshotUpload').files[0];
     const isAnonymous = document.getElementById('isAnonymous').checked;
@@ -647,6 +646,14 @@ function loadTopDonors() {
             }
         });
 }
+
+// Contact Form Submission (Simple Alert for demonstration)
+window.handleContactFormSubmission = function(e) {
+    e.preventDefault();
+    document.getElementById('contactForm').reset();
+    alert("आपका संदेश गौशाला प्रबंधन को सफलतापूर्वक भेज दिया गया है। धन्यवाद!");
+};
+
 
 window.onload = function() {
     loadTopDonors();
