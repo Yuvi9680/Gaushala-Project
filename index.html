@@ -30,6 +30,7 @@
             </div>
             
             <nav id="mainNav">
+                <!-- Data-page attribute is crucial for navigation logic -->
                 <a href="#home" class="nav-link active" data-page="home">मुखपृष्ठ (Home)</a>
                 <a href="#about" class="nav-link" data-page="about">हमारे बारे में (About Us)</a>
                 <a href="#donation" class="nav-link" data-page="donation">दान करें (Donate)</a>
@@ -39,12 +40,19 @@
             </nav>
 
             <div class="auth-buttons">
-                <!-- Login/Signup button will open the unified login page -->
+                <!-- 
+                    सुधार: Login/Signup को एक बटन में रखा गया है। 
+                    प्रोफ़ाइल बटन में अब फोटो प्लेसहोल्डर शामिल है।
+                -->
                 <button id="loginBtn" class="btn btn-secondary" onclick="showPage('login')">Login/Signup</button>
-                <button id="profileBtn" class="btn btn-primary" onclick="showPage('profile')" style="display: none;">
-                    <i data-lucide="user"></i> Profile
-                </button>
-                <button id="logoutBtn" class="btn btn-link" onclick="logoutUser()" style="display: none;">Logout</button>
+                
+                <div id="profileBtnContainer" style="display: none;">
+                    <div class="profile-nav-item" onclick="showPage('profile')">
+                        <img id="profilePhotoNav" src="https://placehold.co/36x36/4CAF50/ffffff?text=U" alt="Profile Photo" class="profile-photo-nav">
+                        <span id="profileNameNav">Profile</span>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-link" onclick="logoutUser()">Logout</button>
+                </div>
             </div>
             
             <!-- Mobile Menu Toggle Button -->
@@ -87,7 +95,6 @@
             <div class="section-card">
                 <h2 class="section-title">शीर्ष दानकर्ता (Top Donors)</h2>
                 <div id="topDonorsSlider" class="donor-slider">
-                    <!-- Dynamic Donor Cards will be injected by script.js -->
                     <p style="padding: 0 10px;">Loading top donors...</p>
                 </div>
                 <div class="text-center mt-3">
@@ -136,7 +143,7 @@
                     <!-- Dynamic QR code will be generated here -->
                 </div>
 
-                <h3 class="section-title mt-5">भुगतान प्रमाण (Payment Proof)</h3>
+                <h3 class="section-title mt-5">भुगतान प्रमाण (General Donation Proof)</h3>
                 <form id="donationForm">
                     <input type="text" id="donorName" placeholder="आपका नाम (English)" required>
                     <input type="tel" id="donorMobile" placeholder="मोबाइल नंबर (English)" required>
@@ -153,7 +160,14 @@
         <!-- C. MEMBERSHIP SECTION -->
         <section id="membership" class="page-section">
             <h2 class="page-title">सदस्यता (Premium Membership)</h2>
-            <div class="section-card animated-form">
+            <div id="membershipThankYouScreen" class="thankyou-screen" style="display: none;">
+                <div class="success-animation"></div>
+                <h2>सदस्यता अनुरोध सफलतापूर्वक जमा!</h2>
+                <p>आपका अनुरोध और भुगतान प्रमाण रिकॉर्ड हो गया है। Admin द्वारा पुष्टि के बाद आपको प्रीमियम बैज मिलेगा।</p>
+                <button class="btn btn-primary mt-4" onclick="showPage('profile')">प्रोफाइल में देखें</button>
+            </div>
+            
+            <div id="membershipInputs" class="section-card animated-form">
                 <p>गौशाला सेवा समिति के प्रीमियम सदस्य बनें और गौ माता की सेवा में विशेष योगदान दें।</p>
                 
                 <h3 class="section-title mt-4">सदस्यता विकल्प</h3>
@@ -169,9 +183,33 @@
                         <button class="btn btn-secondary mt-3" onclick="selectMembership('Yearly', 5001)">वार्षिक चुनें</button>
                     </div>
                 </div>
-                <p class="mt-4 text-center">सदस्यता लेने पर आपकी फोटो 'गौशाला सदस्य' सूची में प्रदर्शित की जाएगी।</p>
+                
+                <h3 class="section-title mt-5" id="selectedMembershipTitle" style="display:none;"></h3>
+                
+                <!-- MEMBERSHIP PAYMENT FORM -->
+                <form id="membershipForm" style="display:none;" class="mt-4">
+                    <div id="membershipQRCodeContainer" class="qr-container mt-4"></div>
+                    
+                    <h4 class="mt-4">सदस्यता विवरण और प्रमाण</h4>
+                    <input type="hidden" id="memberAmount">
+                    <input type="hidden" id="memberType">
+
+                    <input type="text" id="memberDonorName" placeholder="आपका पूरा नाम (English)" required>
+                    <input type="text" id="memberTransactionId" placeholder="12-अंकों का UPI ट्रांजेक्शन ID (English)" required>
+                    
+                    <label class="file-input mt-3">
+                        <input type="file" id="paymentScreenshotUploadMember" accept="image/*" required>
+                        <span><i data-lucide="upload"></i> भुगतान स्क्रीनशॉट अपलोड करें</span>
+                    </label>
+                    
+                    <label class="file-input mt-3">
+                        <input type="file" id="userPhotoUploadMember" accept="image/*" required>
+                        <span><i data-lucide="image"></i> अपनी फोटो अपलोड करें (सदस्य सूची के लिए)</span>
+                    </label>
+
+                    <button type="submit" class="btn btn-cta w-full mt-4">सदस्यता अनुरोध जमा करें</button>
+                </form>
             </div>
-            
         </section>
 
         <!-- D. LOGIN/SIGNUP SECTION (Unified Auth Center - Professional Look) -->
@@ -218,6 +256,13 @@
                 <div class="profile-card animated-form">
                     <h3 class="section-title">प्रोफ़ाइल विवरण</h3>
                     <div id="membershipBadgeArea"></div>
+                    
+                    <!-- Profile Photo Placeholder -->
+                    <div class="profile-photo-large-container">
+                        <img id="profilePhotoLarge" src="https://placehold.co/100x100/4CAF50/ffffff?text=U" alt="Profile Photo" class="profile-photo-large">
+                        <div class="text-center mt-2"><button class="btn-link" onclick="alert('Photo upload will be available when Storage is active.')">Update Photo</button></div>
+                    </div>
+
                     <div id="profileDetails">Loading profile...</div>
                 </div>
                 <div class="profile-card animated-form">
@@ -243,24 +288,24 @@
         <div class="footer-content">
             <div class="footer-col">
                 <h4>सेवाएं</h4>
-                <a href="#donation">दान करें</a>
-                <a href="#membership">सदस्यता लें</a>
-                <a href="#events">इवेंट्स</a>
-                <a href="#contact">संपर्क करें</a>
+                <a href="#donation" data-page="donation">दान करें</a>
+                <a href="#membership" data-page="membership">सदस्यता लें</a>
+                <a href="#events" data-page="events">इवेंट्स</a>
+                <a href="#contact" data-page="contact">संपर्क करें</a>
             </div>
             <div class="footer-col">
                 <h4>हमारी संस्था</h4>
-                <a href="#about">हमारे बारे में</a>
-                <a href="#work-gallery">कार्य गैलरी</a>
+                <a href="#about" data-page="about">हमारे बारे में</a>
+                <a href="#work-gallery" data-page="work-gallery">कार्य गैलरी</a>
                 <a href="#">ब्लॉग्स</a>
-                <a href="#donors-list">दानकर्ता सूची</a>
+                <a href="#donors-list" data-page="donors-list">दानकर्ता सूची</a>
             </div>
             <div class="footer-col">
                 <h4>प्रपत्र (Forms)</h4>
-                <a href="#donation">दान फॉर्म</a>
-                <a href="#membership">सदस्यता फॉर्म</a>
+                <a href="#donation" data-page="donation">दान फॉर्म</a>
+                <a href="#membership" data-page="membership">सदस्यता फॉर्म</a>
                 <a href="#" onclick="alert('स्वयंसेवक फॉर्म यहाँ खुलेगा')">स्वयंसेवक फॉर्म</a>
-                <a href="#" onclick="showPage('login')">लॉगिन/साइनअप</a>
+                <a href="#login" data-page="login">लॉगिन/साइनअप</a>
             </div>
             <div class="footer-col">
                 <h4>कानूनी दस्तावेज़</h4>
@@ -280,4 +325,4 @@
 </body>
 </html>
 
-                        
+    
