@@ -30,23 +30,28 @@
             </div>
             
             <nav id="mainNav">
-                <!-- Mobile Menu: Profile Link Added -->
+                <!-- Mobile Menu Links -->
                 <a href="#profile" class="nav-link mobile-only" data-page="profile" id="mobileProfileLink" style="display:none;"><i data-lucide="user"></i> प्रोफ़ाइल</a>
+                
+                <!-- Common Links -->
                 <a href="#home" class="nav-link active" data-page="home">मुखपृष्ठ (Home)</a>
                 <a href="#about" class="nav-link" data-page="about">हमारे बारे में (About Us)</a>
                 <a href="#donation" class="nav-link" data-page="donation">दान करें (Donate)</a>
                 <a href="#membership" class="nav-link" data-page="membership">सदस्यता (Membership)</a>
                 <a href="#events" class="nav-link" data-page="events">इवेंट्स (Events)</a>
                 <a href="#contact" class="nav-link" data-page="contact">संपर्क (Contact)</a>
+                
+                <!-- Mobile Auth Links -->
                 <a href="#login" class="nav-link mobile-only" data-page="login" id="mobileLoginLink"><i data-lucide="log-in"></i> Login/Signup</a>
                 <a href="#" class="nav-link mobile-only" onclick="logoutUser()" id="mobileLogoutLink" style="display:none;"><i data-lucide="log-out"></i> Logout</a>
 
             </nav>
 
             <div class="auth-buttons">
-                <!-- Desktop Buttons: Login/Profile/Logout -->
+                <!-- Desktop Login/Signup Button -->
                 <button id="loginBtn" class="btn btn-secondary desktop-only" onclick="showPage('login')">Login/Signup</button>
                 
+                <!-- Desktop Profile/Logout Container -->
                 <div id="profileBtnContainer" class="desktop-only" style="display: none;">
                     <div class="profile-nav-item" onclick="showPage('profile')">
                         <img id="profilePhotoNav" src="https://placehold.co/36x36/4CAF50/ffffff?text=U" alt="Profile Photo" class="profile-photo-nav">
@@ -65,9 +70,9 @@
 
     <!-- 2. Main Content Container -->
     <main id="appContainer">
+
         <!-- A. HOME SECTION -->
         <section id="home" class="page-section active">
-            <!-- Content remains the same -->
             <div class="hero-section">
                 <h1 class="hero-title">गौशाला सेवा समिति सिंगनोर</h1>
                 <p class="hero-subtitle">गौ माता की सेवा में आपका स्वागत है। आपके सहयोग से ही यह धर्म कार्य संभव है।</p>
@@ -76,7 +81,7 @@
                 </button>
             </div>
             
-            <!-- Contact Strip -->
+            <!-- Contact Strip (Location, Email, Phone) -->
             <div class="contact-strip animated-form">
                 <a href="https://maps.google.com/?q=गौशाला सिंगनोर" target="_blank" class="contact-item">
                     <i data-lucide="map-pin"></i> सिंगनोर, गौशाला
@@ -92,7 +97,7 @@
                 </a>
             </div>
 
-            <!-- Top Donors Slider -->
+            <!-- Top Donors Slider (Moving Animation) -->
             <div class="section-card">
                 <h2 class="section-title">शीर्ष दानकर्ता (Top Donors)</h2>
                 <div id="topDonorsSlider" class="donor-slider">
@@ -103,7 +108,7 @@
                 </div>
             </div>
 
-            <!-- Content Snippets -->
+            <!-- Content Snippets (Load More Sections) -->
             <div class="grid-2-col">
                 <div class="section-card animated-form">
                     <h3 class="section-title">हमारे कार्य</h3>
@@ -116,12 +121,12 @@
                     <button class="btn btn-primary btn-sm mt-3" onclick="showPage('events')">सभी इवेंट्स</button>
                 </div>
             </div>
+
         </section>
 
         <!-- B. DONATION SECTION -->
         <section id="donation" class="page-section">
             <h2 class="page-title">दान करें (Donate)</h2>
-            <!-- Content remains the same -->
             <div id="thankYouScreen" class="thankyou-screen" style="display: none;">
                 <div class="success-animation"></div>
                 <h2>धन्यवाद!</h2>
@@ -161,7 +166,6 @@
         <!-- C. MEMBERSHIP SECTION -->
         <section id="membership" class="page-section">
             <h2 class="page-title">सदस्यता (Premium Membership)</h2>
-            <!-- Content remains the same -->
             <div id="membershipThankYouScreen" class="thankyou-screen" style="display: none;">
                 <div class="success-animation"></div>
                 <h2>सदस्यता अनुरोध सफलतापूर्वक जमा!</h2>
@@ -216,7 +220,6 @@
 
         <!-- E. PROFILE SECTION -->
         <section id="profile" class="page-section">
-            <!-- Content remains the same -->
             <h2 class="page-title">प्रोफ़ाइल (Profile)</h2>
             <div class="grid-2-col">
                 <div class="profile-card animated-form">
@@ -252,7 +255,6 @@
     <!-- 3. Footer (Universal) -->
     <footer id="footer">
         <div class="footer-content">
-            <!-- Content remains the same -->
             <div class="footer-col">
                 <h4>सेवाएं</h4>
                 <a href="#donation" data-page="donation">दान करें</a>
@@ -272,7 +274,7 @@
                 <a href="#donation" data-page="donation">दान फॉर्म</a>
                 <a href="#membership" data-page="membership">सदस्यता फॉर्म</a>
                 <a href="#" onclick="alert('स्वयंसेवक फॉर्म यहाँ खुलेगा')">स्वयंसेवक फॉर्म</a>
-                <a href="#login" data-page="login">लॉगिन/साइनअप</a>
+                <a href="#profile" data-page="profile">प्रोफ़ाइल</a> <!-- Added Profile Link -->
             </div>
             <div class="footer-col">
                 <h4>कानूनी दस्तावेज़</h4>
@@ -287,8 +289,8 @@
         </div>
     </footer>
 
-    <!-- 4. LOGIN/SIGNUP MODAL (Hidden by default) -->
-    <div id="loginModal" class="modal-overlay" style="display: none;">
+    <!-- 4. LOGIN/SIGNUP MODAL (The Authentication Center) -->
+    <div id="loginModal" class="modal-overlay">
         <div class="auth-card animated-form">
             <button class="modal-close-btn" onclick="hideLoginModal()">&times;</button>
             <div class="auth-tabs">
