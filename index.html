@@ -24,7 +24,6 @@
     <header class="sticky-header">
         <div class="header-content">
             <div class="logo-area" onclick="showPage('home')">
-                <!-- गौशाला लोगो का Placeholder -->
                 <img src="images/logo.png" alt="गौशाला लोगो" class="logo">
                 <span class="text-logo">गौशाला सेवा समिति सिंगनोर</span>
             </div>
@@ -39,14 +38,14 @@
             </nav>
 
             <div class="auth-buttons">
-                <button id="loginBtn" class="btn btn-secondary" onclick="showPage('login')">Login/Signup</button>
+                <!-- User sees one of these two buttons -->
+                <button id="loginBtn" class="btn btn-secondary" onclick="openAuthModal('login')">Login/Signup</button>
                 <button id="profileBtn" class="btn btn-primary" onclick="showPage('profile')" style="display: none;">
                     <i data-lucide="user"></i> Profile
                 </button>
                 <button id="logoutBtn" class="btn btn-link" onclick="logoutUser()" style="display: none;">Logout</button>
             </div>
             
-            <!-- Mobile Menu Toggle Button -->
             <button class="menu-toggle-btn" onclick="toggleMobileMenu()">
                 <i data-lucide="menu"></i>
             </button>
@@ -173,68 +172,7 @@
             
         </section>
 
-        <!-- D. LOGIN/SIGNUP/OTP SECTION (Unified Auth Center) -->
-        <section id="login" class="page-section auth-center">
-            <h2 class="page-title">लॉगिन / साइनअप</h2>
-            <div class="section-card auth-card animated-form">
-                
-                <!-- Email/Password Login -->
-                <form id="loginForm" onsubmit="handleLogin(event)">
-                    <h3 class="section-title">ईमेल और पासवर्ड से लॉगिन</h3>
-                    <input type="email" id="loginEmail" placeholder="Email (English)" required>
-                    <input type="password" id="loginPassword" placeholder="Password (English)" required>
-                    <button type="submit" class="btn btn-primary w-full">Login</button>
-                    <p class="text-center mt-2"><a href="#" onclick="showPage('signup')">खाता नहीं है? साइनअप करें।</a></p>
-                </form>
-
-                <div class="divider">OR</div>
-                
-                <!-- Social & Phone Login Options -->
-                <div class="social-auth-group">
-                    <button class="btn btn-secondary w-full" onclick="signInWithGoogle()">
-                        <i data-lucide="chrome"></i> Google से लॉगिन
-                    </button>
-                    <button class="btn btn-secondary w-full mt-2" onclick="showPage('phone-auth')">
-                         <i data-lucide="phone"></i> Phone OTP से लॉगिन
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- E. SIGNUP SECTION -->
-        <section id="signup" class="page-section auth-center">
-            <h2 class="page-title">नया खाता बनाएँ</h2>
-            <div class="section-card auth-card animated-form">
-                <form onsubmit="handleSignup(event)">
-                    <h3 class="section-title">ईमेल से साइनअप</h3>
-                    <input type="text" id="signupName" placeholder="पूरा नाम (English)" required>
-                    <input type="email" id="signupEmail" placeholder="Email (English)" required>
-                    <input type="password" id="signupPassword" placeholder="Password (English)" required>
-                    <button type="submit" class="btn btn-primary w-full">Sign Up</button>
-                    <p class="text-center mt-2"><a href="#" onclick="showPage('login')">पहले से खाता है? लॉगिन करें।</a></p>
-                </form>
-            </div>
-        </section>
-
-        <!-- F. PHONE AUTH SECTION (OTP) -->
-        <section id="phone-auth" class="page-section auth-center">
-            <h2 class="page-title">फ़ोन OTP से लॉगिन</h2>
-            <div class="section-card auth-card animated-form">
-                <form id="phoneAuthForm" onsubmit="sendOTP(event)">
-                    <input type="tel" id="phoneNumber" placeholder="फ़ोन नंबर (+91XXXXXXXXXX) (English)" required>
-                    <div id="recaptcha-container"></div> <!-- reCAPTCHA container -->
-                    <button type="submit" class="btn btn-primary w-full">OTP भेजें</button>
-                </form>
-                
-                <form id="otpForm" style="display: none;" onsubmit="verifyOTP(event)">
-                    <input type="text" id="verificationCode" placeholder="6-अंकों का OTP (English)" required>
-                    <button type="submit" class="btn btn-secondary w-full">Verify OTP</button>
-                    <p class="text-center mt-2"><a href="#" onclick="showPage('login')">वापस लॉगिन पर जाएं।</a></p>
-                </form>
-            </div>
-        </section>
-
-        <!-- G. PROFILE SECTION -->
+        <!-- D. PROFILE SECTION -->
         <section id="profile" class="page-section">
             <h2 class="page-title">प्रोफ़ाइल (Profile)</h2>
             <div class="grid-2-col">
@@ -253,7 +191,7 @@
             </div>
         </section>
 
-        <!-- H. PLACEHOLDER SECTIONS -->
+        <!-- E. PLACEHOLDER SECTIONS -->
         <section id="about" class="page-section"><h2 class="page-title">हमारे बारे में (About Us)</h2><div class="section-card">गौशाला की कहानी यहाँ आएगी।</div></section>
         <section id="events" class="page-section"><h2 class="page-title">इवेंट्स (Events)</h2><div class="section-card" id="eventSnippet">आगामी इवेंट्स यहाँ दिखाई देंगे।</div></section>
         <section id="contact" class="page-section"><h2 class="page-title">संपर्क (Contact)</h2><div class="section-card">संपर्क फॉर्म और विवरण यहाँ आएगा।</div></section>
@@ -267,24 +205,24 @@
         <div class="footer-content">
             <div class="footer-col">
                 <h4>सेवाएं</h4>
-                <a href="#donation">दान करें</a>
-                <a href="#membership">सदस्यता लें</a>
-                <a href="#events">इवेंट्स</a>
-                <a href="#contact">संपर्क करें</a>
+                <a href="#donation" onclick="showPage('donation')">दान करें</a>
+                <a href="#membership" onclick="showPage('membership')">सदस्यता लें</a>
+                <a href="#events" onclick="showPage('events')">इवेंट्स</a>
+                <a href="#contact" onclick="showPage('contact')">संपर्क करें</a>
             </div>
             <div class="footer-col">
                 <h4>हमारी संस्था</h4>
-                <a href="#about">हमारे बारे में</a>
-                <a href="#work-gallery">कार्य गैलरी</a>
-                <a href="#">ब्लॉग्स</a>
-                <a href="#donors-list">दानकर्ता सूची</a>
+                <a href="#about" onclick="showPage('about')">हमारे बारे में</a>
+                <a href="#work-gallery" onclick="showPage('work-gallery')">कार्य गैलरी</a>
+                <a href="#" onclick="alert('ब्लॉग पेज यहाँ खुलेगा')">ब्लॉग्स</a>
+                <a href="#donors-list" onclick="showPage('donors-list')">दानकर्ता सूची</a>
             </div>
             <div class="footer-col">
                 <h4>प्रपत्र (Forms)</h4>
-                <a href="#donation">दान फॉर्म</a>
-                <a href="#membership">सदस्यता फॉर्म</a>
+                <a href="#donation" onclick="showPage('donation')">दान फॉर्म</a>
+                <a href="#membership" onclick="showPage('membership')">सदस्यता फॉर्म</a>
                 <a href="#" onclick="alert('स्वयंसेवक फॉर्म यहाँ खुलेगा')">स्वयंसेवक फॉर्म</a>
-                <a href="#" onclick="showPage('signup')">साइनअप फॉर्म</a>
+                <a href="#" onclick="openAuthModal('signup')">साइनअप फॉर्म</a>
             </div>
             <div class="footer-col">
                 <h4>कानूनी दस्तावेज़</h4>
@@ -299,9 +237,25 @@
         </div>
     </footer>
 
+
+    <!-- 4. Unified Authentication Modal (Modal will open over content) -->
+    <div id="authModal" class="modal-overlay" onclick="closeAuthModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeAuthModal()"><i data-lucide="x"></i></button>
+            
+            <div id="authContent">
+                <!-- Content will be injected here by script.js (Login or Signup Form) -->
+            </div>
+            
+            <div class="auth-toggle-msg text-center">
+                 <!-- Toggle message will be injected here by script.js -->
+            </div>
+        </div>
+    </div>
+
+
     <!-- Your Main Script File -->
     <script src="script.js"></script>
 </body>
 </html>
 
-                                                                              
