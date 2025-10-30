@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>गौशाला सेवा समिति सिंगनोर - धर्म का कार्य</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for modern feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (Web Icons) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDKs (Using CDN for simplicity on mobile) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+    
+    <!-- qrcode.js CDN for dynamic QR generation -->
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+</head>
+<body id="appBody" class="font-inter">
+
+    <!-- 1. STICKY HEADER / NAVIGATION MENU -->
+    <header id="header" class="sticky-header">
+        <div class="header-content">
+            <div class="logo-area">
+                <img src="images/logo.png" alt="Gaushala Logo" class="logo">
+                <h1 class="text-logo">गौशाला सेवा समिति सिंगनोर</h1>
+            </div>
+            <nav id="mainNav">
+                <a href="#home" class="nav-link active" data-page="home">Home</a>
+                <a href="#about" class="nav-link" data-page="about">About Us</a>
+                <a href="#events" class="nav-link" data-page="events">Events</a>
+                <a href="#donation" class="nav-link btn-primary" data-page="donation">Donate Now</a>
+                <a href="#membership" class="nav-link" data-page="membership">Membership</a>
+                <a href="#blog" class="nav-link" data-page="blog">Blog</a>
+            </nav>
+            <div class="auth-buttons">
+                <button id="loginBtn" class="btn btn-secondary">Login</button>
+                <button id="profileBtn" class="btn btn-secondary" style="display:none;">Profile</button>
+            </div>
+            <button id="menuToggle" class="menu-toggle-btn">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. MAIN CONTENT AREA (The Single Page Sections) -->
+    <main id="appContainer">
+
+        <!-- HOME SECTION (Data-rich and Animated) -->
+        <section id="home" class="page-section active">
+            <div class="hero-section">
+                <h2 class="hero-title">गौ माता की सेवा, धर्म का कार्य</h2>
+                <p class="hero-subtitle">गौशाला सेवा समिति सिंगनोर में आपका स्वागत है। आपका एक छोटा सा दान लाखों जीवन को संवार सकता है।</p>
+                <button class="btn-cta" onclick="showPage('donation')">Donate Now <i data-lucide="arrow-right"></i></button>
+            </div>
+
+            <!-- Contact & Location Strip -->
+            <div class="contact-strip animated-strip">
+                <a href="mailto:goshala@seva.org" class="contact-item"><i data-lucide="mail"></i> Email Us</a>
+                <a href="tel:+919876543210" class="contact-item"><i data-lucide="phone"></i> 98765 43210 (Manager)</a>
+                <a href="https://maps.app.goo.gl/YourGaushalaLocation" target="_blank" class="contact-item"><i data-lucide="map-pin"></i> Gaushala Location</a>
+            </div>
+
+            <!-- Top Donors Slider (Dynamic Content Area) -->
+            <div class="section-card dynamic-section">
+                <h3 class="section-title">शीर्ष दानकर्ता (Top Donors)</h3>
+                <p class="section-description">जिन्होंने गौ माता की सेवा में सबसे बड़ा योगदान दिया।</p>
+                <div id="topDonorsSlider" class="donor-slider">
+                    <!-- Donors will be injected here by script.js (Moving right to left animation) -->
+                    <div class="donor-card-placeholder">Loading Donors...</div>
+                    <div class="donor-card-placeholder">Loading Donors...</div>
+                </div>
+                <button class="btn-tertiary" onclick="showPage('donor-list')">View All Donors (Total Donors)</button>
+            </div>
+
+            <!-- Snippet: About Us -->
+            <div class="section-card content-snippet">
+                <h3 class="section-title">हमारा मिशन</h3>
+                <p>गौशाला सेवा समिति सिंगनोर 2010 से गौ माता के संरक्षण और पोषण के लिए समर्पित है। हमारा उद्देश्य उन्हें एक सुरक्षित और स्वस्थ जीवन प्रदान करना है...</p>
+                <button class="btn-link" onclick="showPage('about')">Read More</button>
+            </div>
+
+            <!-- Snippet: Events -->
+            <div class="section-card content-snippet">
+                <h3 class="section-title">आगामी कार्यक्रम (Upcoming Events)</h3>
+                <div id="eventSnippet">
+                    <!-- Events will be dynamically loaded here -->
+                    <p class="placeholder-text">नवीनतम कार्यक्रम जल्द ही अपडेट किए जाएंगे।</p>
+                </div>
+                <button class="btn-link" onclick="showPage('events')">View Calendar</button>
+            </div>
+
+            <!-- Snippet: Membership -->
+             <div class="section-card content-snippet">
+                <h3 class="section-title">सदस्यता लें और विशेष लाभ पाएं</h3>
+                <p>गौशाला के प्रीमियम सदस्य बनकर आप सीधे गौ सेवा में भागीदार बन सकते हैं और अपनी प्रोफ़ाइल पर विशेष बैज प्राप्त कर सकते हैं।</p>
+                <button class="btn-link" onclick="showPage('membership')">Become a Member</button>
+            </div>
+
+        </section>
+
+        <!-- ABOUT US SECTION -->
+        <section id="about" class="page-section">
+            <h2 class="page-title">हमारे बारे में और गौशाला का इतिहास</h2>
+            <div id="historyContent" class="dynamic-content">
+                <p>यहां गौशाला के इतिहास, संस्थापक सदस्यों और मिशन के बारे में विस्तृत जानकारी लोड होगी, जो एडमिन पैनल से प्रबंधित होगी।</p>
+            </div>
+            <h3 class="section-subtitle">गौ माता और श्रेणियाँ</h3>
+            <div id="cowCategories" class="dynamic-content">
+                <!-- Cow categories and count will load here from Firebase -->
+                <p>वर्तमान में गौशाला में xxx गायें हैं।</p>
+            </div>
+        </section>
+
+        <!-- DONATION SECTION (Includes Dynamic QR and Form) -->
+        <section id="donation" class="page-section">
+            <h2 class="page-title">दान करें और सेवा का लाभ पाएं</h2>
+            <div id="donationFormArea" class="form-container animated-form">
+                <div id="thankYouScreen" style="display: none;" class="thankyou-screen">
+                    <div class="success-animation"></div> <!-- CSS Animation Here -->
+                    <h3 class="text-success">भुगतान विवरण सफलतापूर्वक जमा किया गया!</h3>
+                    <p>आपका दान अभी 'Pending Verification' है। Gau-Seva प्रबंधन 24 घंटे के भीतर इसे सत्यापित (Verify) करेगा।</p>
+                </div>
+
+                <div id="donationInputs">
+                    <label for="donationAmount">1. Select/Enter Amount (INR)</label>
+                    <input type="number" id="donationAmount" value="101" min="10" required>
+                    <button id="generateQRBtn" class="btn-primary" onclick="generateQRCode()">Generate QR Code</button>
+                    
+                    <div id="qrcodeContainer" class="qr-container">
+                        <!-- Dynamic QR Code will be rendered here -->
+                        <p class="text-warning">पहले राशि चुनें और 'Generate QR Code' पर क्लिक करें।</p>
+                    </div>
+
+                    <form id="donationForm" class="mt-8">
+                        <label>2. Confirm Payment Details (For Verification)</label>
+                        <input type="text" id="donorName" placeholder="Your Name (As per Bank/UPI)" required>
+                        <input type="tel" id="donorMobile" placeholder="Mobile Number" required>
+                        <input type="text" id="transactionId" placeholder="12-Digit UPI Transaction ID" required>
+                        <input type="file" id="screenshotUpload" accept="image/*" class="file-input" required>
+                        
+                        <!-- Gupt Daan Checkbox -->
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="isAnonymous">
+                            <label for="isAnonymous">Keep this donation anonymous (गुप्त दान)</label>
+                        </div>
+
+                        <button type="submit" class="btn-primary mt-4">Submit Payment Proof</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- MEMBERSHIP SECTION -->
+        <section id="membership" class="page-section">
+            <h2 class="page-title">प्रीमियम सदस्यता और लाभ</h2>
+            <div id="membershipOptions" class="dynamic-content">
+                <p>सदस्यता विकल्प (मासिक/वार्षिक) यहां Firebase RTDB से लोड होंगे।</p>
+            </div>
+            
+            <form id="membershipForm" class="form-container animated-form">
+                <h3 class="section-subtitle">सदस्यता के लिए आवेदन करें</h3>
+                <input type="text" placeholder="Full Name" required>
+                <input type="file" id="memberPhotoUpload" accept="image/*" required>
+                <!-- Membership payment will use the same QR code logic but with a fixed amount -->
+                <button type="submit" class="btn-primary">Proceed to Membership Payment</button>
+            </form>
+        </section>
+
+        <!-- USER PROFILE SECTION -->
+        <section id="profile" class="page-section auth-required">
+            <h2 class="page-title">User Profile & History</h2>
+            <div id="profileDetails" class="profile-card">
+                <!-- User details loaded from Firebase -->
+                <p>Loading Profile...</p>
+            </div>
+            
+            <div id="membershipBadgeArea" class="membership-status">
+                <!-- Membership badge (or None) will appear here -->
+            </div>
+
+            <div class="donation-history-section">
+                <h3 class="section-subtitle">आपका दान इतिहास</h3>
+                <p id="totalDonatedAmount">Total Donated: ₹0.00</p>
+                <!-- Filters -->
+                <div class="filter-controls">
+                    <label>Filter by Date:</label>
+                    <input type="date" id="dateFilter">
+                    <button onclick="applyHistoryFilter()">Apply Filter</button>
+                </div>
+                <!-- Donation List -->
+                <div id="donationHistoryList" class="history-list">
+                    <!-- Dynamic history items, paginated -->
+                    <p>No donation history found.</p>
+                </div>
+                <div id="paginationControls" class="pagination-controls">
+                    <!-- Pagination buttons -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- OTHER SECTIONS (Events, Blog, etc. - Hidden initially) -->
+        <section id="events" class="page-section"> <h2 class="page-title">गौशाला के आगामी कार्यक्रम</h2> </section>
+        <section id="blog" class="page-section"> <h2 class="page-title">ब्लॉग और समाचार</h2> </section>
+        <section id="donor-list" class="page-section"> <h2 class="page-title">सभी दानकर्ताओं की सूची</h2> </section>
+        
+        <!-- AUTH/LEGAL PAGES (Hidden initially) -->
+        <section id="login" class="page-section auth-page"> <h2 class="page-title">Login / Sign Up</h2> </section>
+        <section id="forgot-password" class="page-section auth-page"> <h2 class="page-title">Forgot Password</h2> </section>
+        
+        <!-- Working/Images Section -->
+        <section id="work" class="page-section"> <h2 class="page-title">गौशाला में सेवा कार्य की झलक</h2> </section>
+
+    </main>
+
+    <!-- 3. UNIVERSAL FOOTER -->
+    <footer id="footer">
+        <div class="footer-content">
+            <!-- Footer Column 1: Quick Links -->
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <a href="#about" onclick="showPage('about')">About Gaushala</a>
+                <a href="#events" onclick="showPage('events')">Events & News</a>
+                <a href="#blog" onclick="showPage('blog')">Our Blog</a>
+                <a href="#work" onclick="showPage('work')">Our Work Gallery</a>
+                <a href="#contact" onclick="showPage('contact')">Contact Us</a>
+            </div>
+
+            <!-- Footer Column 2: Forms & Policies -->
+            <div class="footer-col">
+                <h4>Support & Forms</h4>
+                <a href="#donation" onclick="showPage('donation')">Donate Now</a>
+                <a href="#membership" onclick="showPage('membership')">Membership Form</a>
+                <a href="#gupt-daan" onclick="showPage('donation')">Gupt Daan</a>
+                <a href="privacy_policy.html" target="_blank">Privacy Policy</a>
+                <a href="terms.html" target="_blank">Terms & Conditions</a>
+            </div>
+            
+            <!-- Footer Column 3: Documents & Legal -->
+            <div class="footer-col">
+                <h4>Documentation</h4>
+                <a href="payment_policy.html" target="_blank">Payment Policy</a>
+                <a href="verified_docs.html" target="_blank">Verified Documents</a>
+                <a href="#member-list" onclick="showPage('donor-list')">Member List</a>
+                <a href="#total-donors" onclick="showPage('donor-list')">Total Donor List</a>
+            </div>
+
+            <!-- Footer Column 4: Contact Info -->
+            <div class="footer-col contact-col">
+                <h4>Connect</h4>
+                <p>गौशाला सेवा समिति सिंगनोर, भारत</p>
+                <p>Email: goshala@seva.org</p>
+                <p>Phone: +91 98765 43210</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Gaushala Seva Samiti Singnor. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Your main application logic -->
+    <script src="script.js"></script>
+</body>
+</html>
+
+              
