@@ -6,34 +6,27 @@
     <title>गौशाला सेवा समिति सिंगनोर</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- Lucide Icons for aesthetic and clear UI -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase SDKs (Using CDN for simplicity) -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
     
-    <!-- qrcode.js CDN for dynamic QR generation -->
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 </head>
 <body>
     
-    <!-- 1. Sticky Header and Navigation -->
     <header class="sticky-header">
         <div class="header-content">
             <div class="logo-area" onclick="showPage('home')">
-                <!-- गौशाला लोगो का Placeholder -->
                 <img src="images/logo.png" onerror="this.onerror=null; this.src='https://placehold.co/40x40/4CAF50/ffffff?text=Logo';" alt="गौशाला लोगो" class="logo">
                 <span class="text-logo">गौशाला सेवा समिति सिंगनोर</span>
             </div>
             
             <nav id="mainNav">
-                <!-- Mobile Menu Links -->
                 <a href="#profile" class="nav-link mobile-only" data-page="profile" id="mobileProfileLink" style="display:none;"><i data-lucide="user"></i> प्रोफ़ाइल</a>
                 
-                <!-- Common Links -->
                 <a href="#home" class="nav-link active" data-page="home" onclick="showPage('home')">मुखपृष्ठ (Home)</a>
                 <a href="#about" class="nav-link" data-page="about" onclick="showPage('about')">हमारे बारे में (About Us)</a>
                 <a href="#donation" class="nav-link" data-page="donation" onclick="showPage('donation')">दान करें (Donate)</a>
@@ -41,17 +34,14 @@
                 <a href="#events" class="nav-link" data-page="events" onclick="showPage('events')">इवेंट्स (Events)</a>
                 <a href="#contact" class="nav-link" data-page="contact" onclick="showPage('contact')">संपर्क (Contact)</a>
                 
-                <!-- Mobile Auth Links -->
                 <a href="#login" class="nav-link mobile-only" data-page="login" id="mobileLoginLink" onclick="showPage('login')"><i data-lucide="log-in"></i> Login/Signup</a>
                 <a href="#" class="nav-link mobile-only" onclick="logoutUser()" id="mobileLogoutLink" style="display:none;"><i data-lucide="log-out"></i> Logout</a>
 
             </nav>
 
             <div class="auth-buttons">
-                <!-- Desktop Login/Signup Button -->
                 <button id="loginBtn" class="btn btn-secondary desktop-only" onclick="showPage('login')">Login/Signup</button>
                 
-                <!-- Desktop Profile/Logout Container -->
                 <div id="profileBtnContainer" class="desktop-only" style="display: none;">
                     <div class="profile-nav-item" onclick="showPage('profile')">
                         <img id="profilePhotoNav" src="https://placehold.co/36x36/4CAF50/ffffff?text=U" alt="Profile Photo" class="profile-photo-nav">
@@ -61,17 +51,14 @@
                 </div>
             </div>
             
-            <!-- Mobile Menu Toggle Button -->
             <button class="menu-toggle-btn" onclick="toggleMobileMenu()">
                 <i data-lucide="menu"></i>
             </button>
         </div>
     </header>
 
-    <!-- 2. Main Content Container -->
     <main id="appContainer">
 
-        <!-- A. HOME SECTION -->
         <section id="home" class="page-section active">
             <div class="hero-section">
                 <h1 class="hero-title">गौशाला सेवा समिति सिंगनोर</h1>
@@ -81,7 +68,6 @@
                 </button>
             </div>
             
-            <!-- Contact Strip (Location, Email, Phone) -->
             <div class="contact-strip animated-form">
                 <a href="https://maps.google.com/?q=गौशाला सिंगनोर" target="_blank" class="contact-item">
                     <i data-lucide="map-pin"></i> सिंगनोर, गौशाला
@@ -97,7 +83,6 @@
                 </a>
             </div>
 
-            <!-- Top Donors Slider (Moving Animation) -->
             <div class="section-card">
                 <h2 class="section-title">शीर्ष दानकर्ता (Top Donors)</h2>
                 <div id="topDonorsSlider" class="donor-slider">
@@ -108,7 +93,6 @@
                 </div>
             </div>
 
-            <!-- Content Snippets (Load More Sections) -->
             <div class="grid-2-col">
                 <div class="section-card animated-form">
                     <h3 class="section-title">हमारे कार्य</h3>
@@ -124,7 +108,6 @@
 
         </section>
 
-        <!-- B. DONATION SECTION -->
         <section id="donation" class="page-section">
             <h2 class="page-title">दान करें (Donate)</h2>
             <div id="thankYouScreen" class="thankyou-screen" style="display: none;">
@@ -146,8 +129,7 @@
                 <button class="btn btn-primary w-full" onclick="generateQRCode()">QR कोड जेनरेट करें</button>
 
                 <div id="qrcodeContainer" class="qr-container mt-4">
-                    <!-- Dynamic QR code will be generated here -->
-                </div>
+                    </div>
 
                 <div class="bank-details-box">
                     <h4 class="section-subtitle">बैंक खाते से दान करें</h4>
@@ -171,7 +153,6 @@
             </div>
         </section>
 
-        <!-- C. MEMBERSHIP SECTION -->
         <section id="membership" class="page-section">
             <h2 class="page-title">सदस्यता (Premium Membership)</h2>
             <div id="membershipThankYouScreen" class="thankyou-screen" style="display: none;">
@@ -200,7 +181,6 @@
                 
                 <h3 class="section-title mt-5" id="selectedMembershipTitle" style="display:none;"></h3>
                 
-                <!-- MEMBERSHIP PAYMENT FORM -->
                 <form id="membershipForm" style="display:none;" class="mt-4">
                     <div id="membershipQRCodeContainer" class="qr-container mt-4"></div>
                     
@@ -233,7 +213,6 @@
             </div>
         </section>
 
-        <!-- E. PROFILE SECTION -->
         <section id="profile" class="page-section">
             <h2 class="page-title">प्रोफ़ाइल (Profile)</h2>
             <div class="grid-2-col">
@@ -241,7 +220,6 @@
                     <h3 class="section-title">प्रोफ़ाइल विवरण</h3>
                     <div id="membershipBadgeArea"></div>
                     
-                    <!-- Profile Photo Placeholder -->
                     <div class="profile-photo-large-container">
                         <img id="profilePhotoLarge" src="https://placehold.co/100x100/4CAF50/ffffff?text=U" alt="Profile Photo" class="profile-photo-large">
                         <div class="text-center mt-2"><button class="btn-link" onclick="alert('Photo upload will be available when Storage is active.')">Update Photo</button></div>
@@ -253,14 +231,10 @@
                     <h3 class="section-title">दान का इतिहास</h3>
                     <p id="totalDonatedAmount">कुल दान: ₹0.00</p>
                     <div id="donationHistoryList">Loading history...</div>
-                    <!-- Filter/Pagination controls will be added here -->
-                </div>
+                    </div>
             </div>
         </section>
 
-        <!-- F. PLACEHOLDER SECTIONS -->
-        
-        <!-- ABOUT US -->
         <section id="about" class="page-section">
             <h2 class="page-title">हमारे बारे में (About Us)</h2>
             <div class="section-card">
@@ -271,7 +245,6 @@
             </div>
         </section>
 
-        <!-- EVENTS -->
         <section id="events" class="page-section">
             <h2 class="page-title">आगामी इवेंट्स (Events)</h2>
             <div class="section-card">
@@ -292,7 +265,6 @@
             </div>
         </section>
 
-        <!-- CONTACT -->
         <section id="contact" class="page-section">
             <h2 class="page-title">संपर्क (Contact Us)</h2>
             <div class="grid-2-col">
@@ -318,7 +290,6 @@
             </div>
         </section>
 
-        <!-- DONORS LIST -->
         <section id="donors-list" class="page-section">
             <h2 class="page-title">सभी दानकर्ता सूची</h2>
             <div class="section-card">
@@ -333,7 +304,6 @@
             </div>
         </section>
 
-        <!-- WORK GALLERY -->
         <section id="work-gallery" class="page-section">
             <h2 class="page-title">कार्य गैलरी और पारदर्शिता</h2>
             <div class="section-card">
@@ -347,11 +317,8 @@
             </div>
         </section>
         
-        <!-- Legal Docs are separate HTML files and linked in Footer -->
-
-    </main>
+        </main>
     
-    <!-- 3. Footer (Universal) -->
     <footer id="footer">
         <div class="footer-content">
             <div class="footer-col">
@@ -384,22 +351,18 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 गौशाला सेवा समिति सिंगनोर. सर्व अधिकार सुरक्षित।</p>
+            <p>© 2025 गौशाला सेवा समिति सिंगनोर. सर्व अधिकार सुरक्षित।</p>
         </div>
     </footer>
 
-    <!-- 4. LOGIN/SIGNUP MODAL (The Authentication Center) -->
     <div id="loginModal" class="modal-overlay">
         <div class="auth-card animated-form">
-            <!-- FIX: Cross button now correctly closes the modal -->
-            <button class="modal-close-btn" onclick="hideLoginModal()">&times;</button> 
+            <button class="modal-close-btn" onclick="hideLoginModal()">×</button> 
             <div class="auth-tabs">
-                <!-- Tabs for Login and Signup -->
                 <button class="tab-button active" onclick="switchAuthTab('login')">लॉगिन (Login)</button>
                 <button class="tab-button" onclick="switchAuthTab('signup')">साइनअप (Signup)</button>
             </div>
             
-            <!-- LOGIN TAB CONTENT -->
             <div id="loginTabContent" class="auth-content active">
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <input type="email" id="loginEmail" placeholder="Email (English)" required>
@@ -415,7 +378,6 @@
                 </button>
             </div>
             
-            <!-- SIGNUP TAB CONTENT -->
             <div id="signupTabContent" class="auth-content">
                 <form id="signupForm" onsubmit="handleSignup(event)">
                     <input type="text" id="signupName" placeholder="पूरा नाम (English)" required>
@@ -428,8 +390,6 @@
     </div>
 
 
-    <!-- Your Main Script File -->
     <script src="script.js"></script>
 </body>
 </html>
-
