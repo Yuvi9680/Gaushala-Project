@@ -24,7 +24,6 @@ try {
     console.log("Firebase services initialized successfully.");
 } catch (error) {
     console.error("Firebase Initialization Error:", error);
-    // Use custom modal or message box instead of alert() if possible in real app
     alert("वेबसाइट सेवाओं को लोड करने में समस्या। कृपया कंसोल देखें।");
 }
 
@@ -58,9 +57,11 @@ window.handleSignup = async function(e) {
             address: 'N/A',
             membership: 'None', 
             createdAt: new Date().toISOString(),
-            totalDonated: 0
+            totalDonated: 0,
+            profilePhotoURL: 'N/A' // Placeholder for photo
         });
         alert("पंजीकरण सफल! Welcome " + name + "!");
+        document.getElementById('signupForm').reset(); // Form Reset
         showPage('profile');
     } catch (error) {
         alert("पंजीकरण में त्रुटि: " + error.message);
@@ -75,6 +76,7 @@ window.handleLogin = async function(e) {
     try {
         await auth.signInWithEmailAndPassword(email, password);
         alert("लॉगिन सफल!");
+        document.getElementById('loginForm').reset(); // Form Reset
         showPage('home');
     } catch (error) {
         // Smart Auth Logic: If user not found, redirect to signup automatically
@@ -102,7 +104,8 @@ window.signInWithGoogle = async function() {
                 address: 'N/A',
                 membership: 'None',
                 createdAt: new Date().toISOString(),
-                totalDonated: 0
+                totalDonated: 0,
+                profilePhotoURL: result.user.photoURL || 'N/A' // Use Google Photo if available
             });
         }
         alert("Google लॉगिन सफल!");
@@ -130,24 +133,29 @@ window.handlePasswordReset = async function() {
 
 firebase.auth().onAuthStateChanged((user) => {
     const loginBtn = document.getElementById('loginBtn');
-    const profileBtn = document.getElementById('profileBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const profileBtnContainer = document.getElementById('profileBtnContainer');
+    const profilePhotoNav = document.getElementById('profilePhotoNav');
+    const profileNameNav = document.getElementById('profileNameNav');
     
     if (user) {
         currentUserId = user.uid;
         
-        // Read user data once to set name/membership for UI
         database.ref('users/' + user.uid).once('value', (snapshot) => {
             const userData = snapshot.val();
             if (userData) {
                 currentMembershipStatus = userData.membership || 'None';
-                profileBtn.innerHTML = `<i data-lucide="user"></i> ${userData.name || 'Profile'}`;
+                const photoUrl = userData.profilePhotoURL && userData.profilePhotoURL !== 'N/A' 
+                                 ? userData.profilePhotoURL 
+                                 : `https://placehold.co/36x36/4CAF50/ffffff?text=${(userData.name || 'U').charAt(0)}`;
+
+                profileNameNav.textContent = userData.name || 'Profile';
+                profilePhotoNav.src = photoUrl;
+                document.getElementById('profilePhotoLarge').src = photoUrl; // Update large photo
             }
         });
 
         loginBtn.style.display = 'none';
-        profileBtn.style.display = 'inline-flex';
-        logoutBtn.style.display = 'inline-flex';
+        profileBtnContainer.style.display = 'flex'; // Use flex for better layout
         
         loadTopDonors(); 
 
@@ -155,8 +163,7 @@ firebase.auth().onAuthStateChanged((user) => {
         currentUserId = null;
         currentMembershipStatus = 'None';
         loginBtn.style.display = 'inline-flex';
-        profileBtn.style.display = 'none';
-        logoutBtn.style.display = 'none';
+        profileBtnContainer.style.display = 'none';
         
         loadTopDonors();
     }
@@ -195,12 +202,14 @@ window.showPage = function(pageId) {
     }
     window.location.hash = pageId;
 
-    // Highlight active link in header
+    // Highlight active link in header AND close mobile menu
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('data-page') === pageId) {
             link.classList.add('active');
         }
+        // Fix: Close mobile menu on any link click
+        document.getElementById('mainNav').classList.remove('open');
     });
 
     // Load page-specific content
@@ -230,11 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('loginForm').addEventListener('submit', window.handleLogin);
     document.getElementById('signupForm').addEventListener('submit', window.handleSignup);
+    document.getElementById('membershipForm').addEventListener('submit', window.handleMembershipSubmission);
 });
 
 
 // --------------------------------------------------------------------------
-// 4. DONATION & QR CODE GENERATION LOGIC
+// 4. DONATION LOGIC (General Donation)
 // --------------------------------------------------------------------------
 
 // Function to generate Dynamic QR Code
@@ -280,8 +290,7 @@ document.getElementById('donationForm').addEventListener('submit', async functio
     const screenshotFile = document.getElementById('screenshotUpload').files[0];
     const isAnonymous = document.getElementById('isAnonymous').checked;
     
-    const isMembership = e.target.getAttribute('data-type') === 'membership';
-    const donationType = isMembership ? 'Membership' : (isAnonymous ? 'Gupt Daan' : 'General');
+    const donationType = isAnonymous ? 'Gupt Daan' : 'General';
 
 
     if (!screenshotFile || !txId || !amount) {
@@ -297,7 +306,7 @@ document.getElementById('donationForm').addEventListener('submit', async functio
     try {
         let downloadURL = 'N/A';
         // 1. Upload Screenshot to Firebase Storage (Requires Blaze Plan - 5GB Free Tier)
-        const storageRef = storage.ref(`screenshots/${txId}_${Date.now()}`);
+        const storageRef = storage.ref(`screenshots/donation_${txId}_${Date.now()}`);
         const snapshot = await storageRef.put(screenshotFile);
         downloadURL = await snapshot.ref.getDownloadURL();
 
@@ -319,40 +328,25 @@ document.getElementById('donationForm').addEventListener('submit', async functio
         
         await newDonationRef.set(donationData);
         
-        // 3. Update User's Total Donated Amount 
-        if (currentUserId) {
-            const userRef = database.ref('users/' + currentUserId);
-            userRef.child('totalDonated').transaction((currentTotal) => {
-                return (currentTotal || 0) + parseFloat(amount);
-            });
-            if (isMembership) {
-                 userRef.update({ 
-                    membership: 'Premium', 
-                    lastMembershipPayment: new Date().toISOString(),
-                 });
-            }
-        }
-        
-        // 4. Show Thank You Screen 
+        // 3. Show Thank You Screen and RESET
         document.getElementById('donationInputs').style.display = 'none';
         document.getElementById('thankYouScreen').style.display = 'block';
         
-        // Reset button and form
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Payment Proof';
-        document.getElementById('donationForm').reset();
-        
+        document.getElementById('donationForm').reset(); // Form Reset
+        document.getElementById('donationAmount').value = 500; // Reset amount input value
+
     } catch (error) {
         console.error("Donation Submission Error:", error);
         alert("भुगतान विवरण जमा करने में त्रुटि आई। (Storage Blaze Plan सुनिश्चित करें)।");
+    } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Payment Proof';
+        submitBtn.textContent = 'भुगतान की पुष्टि करें और डेटा भेजें';
     }
 });
 
 
 // --------------------------------------------------------------------------
-// 5. MEMBERSHIP & PROFILE LOGIC
+// 5. MEMBERSHIP LOGIC (Separate Form and Submission)
 // --------------------------------------------------------------------------
 
 window.selectMembership = function(type, amount) {
@@ -362,24 +356,132 @@ window.selectMembership = function(type, amount) {
         return;
     }
     
-    showPage('donation');
-    document.getElementById('donationAmount').value = amount;
+    // Show selected membership details and form
+    document.getElementById('selectedMembershipTitle').textContent = `${type} सदस्यता: ₹${amount}`;
+    document.getElementById('selectedMembershipTitle').style.display = 'block';
     
-    document.getElementById('donationForm').setAttribute('data-type', 'membership');
+    document.getElementById('memberAmount').value = amount;
+    document.getElementById('memberType').value = type;
+    document.getElementById('memberDonorName').value = firebase.auth().currentUser.displayName || ''; // Pre-fill name
 
-    generateQRCode();
-    alert(`आपने ${type} सदस्यता (₹${amount}) चुनी है। अब भुगतान करें और प्रमाण अपलोड करें।`);
+    document.getElementById('membershipForm').style.display = 'block';
+
+    // Generate QR code for the exact membership amount in the membership section
+    const qrContainer = document.getElementById('membershipQRCodeContainer');
+    qrContainer.innerHTML = '';
+    
+    try {
+        new QRCode(qrContainer, {
+            text: `upi://pay?pa=${VPA}&pn=GoshalaMember&am=${amount}&tn=${type}Member`,
+            width: 150,
+            height: 150,
+            colorDark : "#333333",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        qrContainer.innerHTML += `<p class="mt-2 text-primary">सदस्यता शुल्क भुगतान के लिए स्कैन करें।</p>`;
+    } catch (e) {
+        qrContainer.innerHTML = `<p class="text-error">QR Code generation failed. Please use UPI VPA manually.</p>`;
+    }
 }
+
+window.handleMembershipSubmission = async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('memberDonorName').value;
+    const txId = document.getElementById('memberTransactionId').value;
+    const amount = document.getElementById('memberAmount').value;
+    const type = document.getElementById('memberType').value;
+    const paymentFile = document.getElementById('paymentScreenshotUploadMember').files[0];
+    const userPhotoFile = document.getElementById('userPhotoUploadMember').files[0];
+
+    if (!paymentFile || !userPhotoFile || !txId || !amount) {
+        alert("सभी फ़ील्ड (स्क्रीनशॉट और फोटो सहित) अनिवार्य हैं।");
+        return;
+    }
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading Proofs...';
+
+    try {
+        let paymentURL = 'N/A';
+        let photoURL = 'N/A';
+
+        // 1. Upload Payment Screenshot
+        const payRef = storage.ref(`screenshots/member_pay_${txId}_${Date.now()}`);
+        paymentURL = (await payRef.put(paymentFile)).ref.getDownloadURL();
+
+        // 2. Upload User Photo
+        const photoRef = storage.ref(`member_photos/${currentUserId}_${Date.now()}`);
+        photoURL = (await photoRef.put(userPhotoFile)).ref.getDownloadURL();
+
+        // Wait for both URLs
+        const [finalPaymentURL, finalPhotoURL] = await Promise.all([paymentURL, photoURL]);
+        
+        // 3. Save Membership Data to RTDB (Pending)
+        const newMemberRef = database.ref('donations').push();
+        await newMemberRef.set({
+            donorName: name,
+            amount: parseFloat(amount),
+            transactionId: txId,
+            paymentURL: finalPaymentURL,
+            userPhotoURL: finalPhotoURL,
+            timestamp: new Date().toISOString(),
+            status: 'Pending Membership', 
+            type: type + ' Membership', 
+            donorId: currentUserId,
+            donationID: newMemberRef.key 
+        });
+
+        // 4. Update User Profile with Pending Photo (Optional)
+        await database.ref('users/' + currentUserId).update({
+            profilePhotoURL: finalPhotoURL,
+            membership: 'Pending'
+        });
+
+
+        // 5. Show Thank You Screen and RESET
+        document.getElementById('membershipInputs').style.display = 'none';
+        document.getElementById('membershipThankYouScreen').style.display = 'block';
+        
+        document.getElementById('membershipForm').reset(); 
+
+    } catch (error) {
+        console.error("Membership Submission Error:", error);
+        alert("सदस्यता अनुरोध जमा करने में त्रुटि आई। (Storage Blaze Plan सुनिश्चित करें)।");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'सदस्यता अनुरोध जमा करें';
+    }
+}
+
+
+// --------------------------------------------------------------------------
+// 6. PROFILE LOGIC & MEMBERSHIP EXPIRY (Placeholder for future Cloud Functions)
+// --------------------------------------------------------------------------
 
 async function loadUserProfile(uid) {
     const profileRef = database.ref('users/' + uid);
     const profileCard = document.getElementById('profileDetails');
     const badgeArea = document.getElementById('membershipBadgeArea');
     const totalDonated = document.getElementById('totalDonatedAmount');
+    const profilePhotoLarge = document.getElementById('profilePhotoLarge');
 
     profileRef.on('value', (snapshot) => {
         const user = snapshot.val();
         if (user) {
+            // Check Membership Expiry (Client-Side Placeholder - Needs Cloud Function in production)
+            if (user.membership === 'Premium' && user.membershipExpiryDate) {
+                 const expiry = new Date(user.membershipExpiryDate);
+                 if (expiry < new Date()) {
+                     user.membership = 'None';
+                     // In production, this update MUST be done by a Firebase Cloud Function (Cron Job)
+                     profileRef.update({ membership: 'None' }); 
+                 }
+            }
+
+
             // Display User Details
             profileCard.innerHTML = `
                 <h3 class="section-subtitle">${user.name || 'Anonymous User'}</h3>
@@ -392,7 +494,14 @@ async function loadUserProfile(uid) {
             // Display Total Donation Amount
             totalDonated.textContent = `कुल दान: ₹${(user.totalDonated || 0).toFixed(2)}`;
 
-            // Membership Badge Logic
+            // Profile Photo Update
+            const photoUrl = user.profilePhotoURL && user.profilePhotoURL !== 'N/A' 
+                                ? user.profilePhotoURL 
+                                : `https://placehold.co/100x100/4CAF50/ffffff?text=${(user.name || 'U').charAt(0)}`;
+            profilePhotoLarge.src = photoUrl;
+            document.getElementById('profilePhotoNav').src = photoUrl;
+
+           // Membership Badge Logic
             const isPremium = user.membership === 'Premium';
             badgeArea.innerHTML = isPremium 
                 ? `<div class="premium-badge">Goshala Premium Member <i data-lucide="star"></i></div>`
@@ -403,8 +512,8 @@ async function loadUserProfile(uid) {
 
     // Edit Profile Modal function
     window.openEditProfileModal = function() {
-        const user = profileRef.toJSON(); // Get current user data
-        const newName = prompt("Enter new Name:", user.name || '');
+        // Simple prompt for mobile environment
+        const newName = prompt("Enter new Name:", firebase.auth().currentUser.displayName || '');
         const newMobile = prompt("Enter new Mobile:", user.mobile || '');
         const newAddress = prompt("Enter new Address:", user.address || '');
 
@@ -433,13 +542,12 @@ async function loadDonationHistory(uid) {
             const date = new Date(donation.timestamp).toLocaleDateString('hi-IN');
             
             // Status styling
-            const statusClass = donation.status === 'Approved' ? 'text-primary' : 'text-secondary';
+            const statusClass = donation.status === 'Approved' ? 'text-primary' : (donation.status === 'Pending Verification' ? 'text-secondary' : 'text-danger');
 
             historyHTML += `
                 <div class="donation-item section-card">
-                    <p><strong>राशि:</strong> ₹${donation.amount}</p>
+                    <p><strong>राशि:</strong> ₹${donation.amount} (${donation.type})</p>
                     <p><strong>तारीख:</strong> ${date}</p>
-                    <p><strong>प्रकार:</strong> ${donation.type}</p>
                     <p class="status-indicator ${statusClass}"><strong>स्थिति:</strong> ${donation.status}</p>
                 </div>
             `;
@@ -451,11 +559,10 @@ async function loadDonationHistory(uid) {
 
 
 // --------------------------------------------------------------------------
-// 6. DYNAMIC CONTENT LOADING (Top Donors & Content Snippets)
+// 7. DYNAMIC CONTENT LOADING (Top Donors)
 // --------------------------------------------------------------------------
 
 function loadTopDonors() {
-    // This function needs to fetch and display data dynamically.
     const sliderContainer = document.getElementById('topDonorsSlider');
     sliderContainer.innerHTML = '<p style="padding: 0 10px;">Loading donors list...</p>';
 
@@ -469,8 +576,8 @@ function loadTopDonors() {
             snapshot.forEach(child => {
                 const donation = child.val();
                 if (!donation.isAnonymous) {
-                    // Placeholder for image, replace with user uploaded image if available in storage later
-                    const imageUrl = `https://placehold.co/60x60/FF9800/ffffff?text=${donation.donorName[0]}`;
+                    // Placeholder for image
+                    const imageUrl = `https://placehold.co/60x60/FF9800/ffffff?text=${(donation.donorName || 'D').charAt(0)}`;
                     donorCardsHTML += `
                         <div class="donor-card">
                             <img src="${imageUrl}" alt="${donation.donorName}">
@@ -492,3 +599,4 @@ function loadTopDonors() {
 window.onload = function() {
     loadTopDonors();
 };
+             
