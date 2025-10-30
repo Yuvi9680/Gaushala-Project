@@ -518,7 +518,8 @@ window.handleMembershipSubmission = async function(e) {
             // Placeholder: Expiry date calculation would be here once confirmed by admin
         });
 
-// 5. Show Thank You Screen and RESET
+
+        // 5. Show Thank You Screen and RESET
         document.getElementById('membershipInputs').style.display = 'none';
         document.getElementById('membershipThankYouScreen').style.display = 'block';
         
@@ -567,7 +568,7 @@ async function loadUserProfile(uid) {
                 <p><strong>Address:</strong> ${user.address || 'N/A'}</p>
                 <button class="btn btn-secondary mt-3" onclick="openEditProfileModal()">Edit Profile</button>
             `;
-
+            
             // Display Total Donation Amount
             totalDonated.textContent = `कुल दान: ₹${(user.totalDonated || 0).toFixed(2)}`;
 
@@ -627,7 +628,8 @@ async function loadDonationHistory(uid) {
         snapshot.forEach(child => {
             const donation = child.val();
             const date = new Date(donation.timestamp).toLocaleDateString('hi-IN');
-// Status styling
+            
+            // Status styling
             const statusClass = donation.status === 'Approved' ? 'text-primary' : (donation.status.includes('Pending') ? 'text-secondary' : 'text-danger');
 
             historyHTML += `
@@ -692,7 +694,7 @@ window.handleContactFormSubmission = function(e) {
     const subject = `New Contact Form Submission from ${name}`;
     const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
 
-// Use mailto: for free email submission to ys0224379@gmail.com
+    // Use mailto: for free email submission to ys0224379@gmail.com
     window.location.href = `mailto:ys0224379@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     document.getElementById('contactForm').reset();
@@ -703,4 +705,3 @@ window.handleContactFormSubmission = function(e) {
 window.onload = function() {
     loadTopDonors();
 };
-                         
