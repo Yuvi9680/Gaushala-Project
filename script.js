@@ -24,6 +24,7 @@ try {
     console.log("Firebase services initialized successfully.");
 } catch (error) {
     console.error("Firebase Initialization Error:", error);
+    // Use custom modal or message box instead of alert() if possible in real app
     alert("वेबसाइट सेवाओं को लोड करने में समस्या। कृपया कंसोल देखें।");
 }
 
@@ -31,14 +32,11 @@ try {
 // Global Variables
 let currentUserId = null;
 let currentMembershipStatus = 'None';
-const VPA = "yourgoshala@upi"; // <--- गौशाला का VPA यहाँ बदलें
-
-// Global confirmation result for phone auth (needed for 2-step verification)
-let confirmationResult = null;
+const VPA = "yourgoshala@upi"; // <--- गौशाला का VPA यहाँ बदलें (e.g., upi@bank)
 
 
 // --------------------------------------------------------------------------
-// 2. AUTHENTICATION (Login, Signup, Google, Phone OTP)
+// 2. AUTHENTICATION (Login, Signup, Google)
 // --------------------------------------------------------------------------
 
 // --- A. Email/Password Signup/Login ---
@@ -51,13 +49,14 @@ window.handleSignup = async function(e) {
 
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        
         // Save initial user data to Realtime Database
-        database.ref('users/' + userCredential.user.uid).set({
+        await database.ref('users/' + userCredential.user.uid).set({
             name: name,
             email: email,
             mobile: 'N/A',
             address: 'N/A',
-            membership: 'None', // Default status
+            membership: 'None', 
             createdAt: new Date().toISOString(),
             totalDonated: 0
         });
@@ -78,7 +77,13 @@ window.handleLogin = async function(e) {
         alert("लॉगिन सफल!");
         showPage('home');
     } catch (error) {
-        alert("लॉगिन में त्रुटि: " + error.message);
+        // Smart Auth Logic: If user not found, redirect to signup automatically
+        if (error.code === 'auth/user-not-found') {
+            alert("यह ईमेल पंजीकृत नहीं है। कृपया साइनअप करें।");
+            switchAuthTab('signup');
+        } else {
+            alert("लॉगिन में त्रुटि: " + error.message);
+        }
     }
 }
 
@@ -90,7 +95,7 @@ window.signInWithGoogle = async function() {
         
         // Check if user is new, then create profile data
         if (result.additionalUserInfo.isNewUser) {
-            database.ref('users/' + result.user.uid).set({
+            await database.ref('users/' + result.user.uid).set({
                 name: result.user.displayName,
                 email: result.user.email,
                 mobile: result.user.phoneNumber || 'N/A',
@@ -107,71 +112,19 @@ window.signInWithGoogle = async function() {
     }
 }
 
-// --- C. Phone OTP Authentication (With reCAPTCHA) ---
-
-// Setup reCAPTCHA Verifier on page load
-window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-    'size': 'invisible', // Invisible reCAPTCHA is better for UX
-    'callback': (response) => {
-        // reCAPTCHA solved, but we handle logic in sendOTP function
-    },
-    'expired-callback': () => {
-        // User timeout
-        alert("CAPTCHA सत्र समाप्त हो गया है, कृपया पुनः प्रयास करें।");
-    }
-});
-recaptchaVerifier.render(); // Render the invisible captcha
-
-window.sendOTP = async function(e) {
-    e.preventDefault();
-    const phoneNumber = document.getElementById('phoneNumber').value;
-    const phoneAuthForm = document.getElementById('phoneAuthForm');
-    const otpForm = document.getElementById('otpForm');
-
-    try {
-        // Send the OTP
-        confirmationResult = await auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier);
-        
-        // Switch to OTP input form
-        alert("OTP भेजा गया है।");
-        phoneAuthForm.style.display = 'none';
-        otpForm.style.display = 'block';
-    } catch (error) {
-        console.error("OTP Error:", error);
-        alert("OTP भेजने में त्रुटि: " + error.message);
-        window.recaptchaVerifier.render(); // Reset reCAPTCHA on error
-    }
-}
-
-window.verifyOTP = async function(e) {
-    e.preventDefault();
-    const code = document.getElementById('verificationCode').value;
-
-    if (!confirmationResult) {
-        alert("पहले OTP भेजने का प्रयास करें।");
-        return;
-    }
-
-    try {
-        const result = await confirmationResult.confirm(code);
-        // Check if user is new, then create profile data
-        if (result.additionalUserInfo.isNewUser) {
-             database.ref('users/' + result.user.uid).set({
-                name: 'OTP User',
-                email: result.user.email || 'N/A',
-                mobile: result.user.phoneNumber,
-                address: 'N/A',
-                membership: 'None',
-                createdAt: new Date().toISOString(),
-                totalDonated: 0
-            });
+// --- C. Password Reset ---
+window.handlePasswordReset = async function() {
+    const email = prompt("पासवर्ड रीसेट के लिए अपना ईमेल दर्ज करें:");
+    if (email) {
+        try {
+            await auth.sendPasswordResetEmail(email);
+            alert("पासवर्ड रीसेट लिंक आपके ईमेल पर भेज दिया गया है।");
+        } catch (error) {
+            alert("रीसेट ईमेल भेजने में त्रुटि: " + error.message);
         }
-        alert("OTP Verification सफल!");
-        showPage('home');
-    } catch (error) {
-        alert("OTP सत्यापन में त्रुटि: " + error.message);
     }
 }
+
 
 // --- D. Auth State Listener & Logout ---
 
@@ -196,7 +149,7 @@ firebase.auth().onAuthStateChanged((user) => {
         profileBtn.style.display = 'inline-flex';
         logoutBtn.style.display = 'inline-flex';
         
-        loadTopDonors(); // Load dynamic data once user is known
+        loadTopDonors(); 
 
     } else {
         currentUserId = null;
@@ -212,30 +165,58 @@ firebase.auth().onAuthStateChanged((user) => {
 window.logoutUser = async function() {
     await auth.signOut();
     alert("आप सफलतापूर्वक लॉगआउट हो गए हैं।");
-    // Reload icons after logout, as the user button icon changes
     lucide.createIcons(); 
     showPage('home');
 }
 
 
 // --------------------------------------------------------------------------
-// 4. SINGLE PAGE APPLICATION (SPA) NAVIGATION & DYNAMIC CONTENT
+// 3. SINGLE PAGE APPLICATION (SPA) NAVIGATION & UI LOGIC
 // --------------------------------------------------------------------------
 
-// Main Navigation Function (uses window scope for easy HTML access)
-window.showPage = function(pageId) {
-    // Logic to hide/show sections and update URL hash (same as previous plan)
-    // ...
+// Function to switch between Login and Signup tabs
+window.switchAuthTab = function(tabId) {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.tab-button[onclick*='${tabId}']`).classList.add('active');
     
+    document.querySelectorAll('.auth-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(tabId + 'TabContent').classList.add('active');
+}
+
+// Main Navigation Function
+window.showPage = function(pageId) {
+    document.querySelectorAll('.page-section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    const targetSection = document.getElementById(pageId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+    window.location.hash = pageId;
+
+    // Highlight active link in header
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-page') === pageId) {
+            link.classList.add('active');
+        }
+    });
+
     // Load page-specific content
     if (pageId === 'profile' && currentUserId) {
         loadUserProfile(currentUserId);
         loadDonationHistory(currentUserId);
     }
-    // ...
 }
 
-// Handle Hash Change (same as previous plan)
+// Mobile Menu Toggle
+window.toggleMobileMenu = function() {
+    document.getElementById('mainNav').classList.toggle('open');
+}
+
+
+// Handle Hash Change 
 window.addEventListener('hashchange', () => {
     const pageId = window.location.hash.substring(1) || 'home';
     showPage(pageId);
@@ -243,24 +224,50 @@ window.addEventListener('hashchange', () => {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons(); // Initialize icons
+    lucide.createIcons(); 
     const pageId = window.location.hash.substring(1) || 'home';
     showPage(pageId);
     
-    // Setup event listeners for forms defined outside the main script flow
     document.getElementById('loginForm').addEventListener('submit', window.handleLogin);
     document.getElementById('signupForm').addEventListener('submit', window.handleSignup);
 });
 
 
 // --------------------------------------------------------------------------
-// 5. DONATION & QR CODE GENERATION LOGIC
+// 4. DONATION & QR CODE GENERATION LOGIC
 // --------------------------------------------------------------------------
 
-// Function to generate Dynamic QR Code (same as previous plan)
+// Function to generate Dynamic QR Code
 window.generateQRCode = function() {
-    // ... [Logic for QR Code generation using VPA and donationAmount]
+    const amount = document.getElementById('donationAmount').value;
+    const qrContainer = document.getElementById('qrcodeContainer');
+
+    if (!amount || amount < 10) {
+        qrContainer.innerHTML = '<p class="text-error">कृपया दान की सही राशि दर्ज करें (न्यूनतम ₹10)।</p>';
+        return;
+    }
+
+    const upiLink = `upi://pay?pa=${VPA}&pn=GaushalaSingnor&am=${amount}&tn=Donation${Date.now()}`;
+
+    qrContainer.innerHTML = ''; 
+    
+    try {
+        new QRCode(qrContainer, {
+            text: upiLink,
+            width: 200,
+            height: 200,
+            colorDark : "#333333",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        qrContainer.innerHTML += `<p class="mt-2 text-primary">UPI ऐप से स्कैन करें।</p>`;
+    } catch (e) {
+        qrContainer.innerHTML = `<p class="text-error">QR Code generation failed. Use the manual link below:</p>
+                                 <a href="${upiLink}" target="_blank" class="btn-link">Click to Pay via UPI App</a>`;
+        console.error("QR Code Error:", e);
+    }
 }
+
 
 // Function to handle Payment Proof Submission (Donation Form)
 document.getElementById('donationForm').addEventListener('submit', async function(e) {
@@ -273,7 +280,6 @@ document.getElementById('donationForm').addEventListener('submit', async functio
     const screenshotFile = document.getElementById('screenshotUpload').files[0];
     const isAnonymous = document.getElementById('isAnonymous').checked;
     
-    // Membership logic check
     const isMembership = e.target.getAttribute('data-type') === 'membership';
     const donationType = isMembership ? 'Membership' : (isAnonymous ? 'Gupt Daan' : 'General');
 
@@ -313,18 +319,16 @@ document.getElementById('donationForm').addEventListener('submit', async functio
         
         await newDonationRef.set(donationData);
         
-        // 3. Update User's Total Donated Amount (Transactionally safe update)
+        // 3. Update User's Total Donated Amount 
         if (currentUserId) {
             const userRef = database.ref('users/' + currentUserId);
             userRef.child('totalDonated').transaction((currentTotal) => {
                 return (currentTotal || 0) + parseFloat(amount);
             });
-            // Update membership status if applicable (Admin will confirm expiry date later)
             if (isMembership) {
                  userRef.update({ 
                     membership: 'Premium', 
                     lastMembershipPayment: new Date().toISOString(),
-                    // Expiry Date logic MUST be handled by admin or cloud function
                  });
             }
         }
@@ -348,7 +352,7 @@ document.getElementById('donationForm').addEventListener('submit', async functio
 
 
 // --------------------------------------------------------------------------
-// 6. MEMBERSHIP LOGIC
+// 5. MEMBERSHIP & PROFILE LOGIC
 // --------------------------------------------------------------------------
 
 window.selectMembership = function(type, amount) {
@@ -358,28 +362,20 @@ window.selectMembership = function(type, amount) {
         return;
     }
     
-    // Redirect to donation page with membership details pre-filled
     showPage('donation');
     document.getElementById('donationAmount').value = amount;
     
-    // Mark the form for membership submission
     document.getElementById('donationForm').setAttribute('data-type', 'membership');
 
-    // Generate QR code for the membership amount
     generateQRCode();
     alert(`आपने ${type} सदस्यता (₹${amount}) चुनी है। अब भुगतान करें और प्रमाण अपलोड करें।`);
 }
-
-// --------------------------------------------------------------------------
-// 7. USER PROFILE LOGIC (LOAD, HISTORY, MEMBERSHIP)
-// --------------------------------------------------------------------------
 
 async function loadUserProfile(uid) {
     const profileRef = database.ref('users/' + uid);
     const profileCard = document.getElementById('profileDetails');
     const badgeArea = document.getElementById('membershipBadgeArea');
-
-    profileCard.innerHTML = "<p>Loading profile...</p>";
+    const totalDonated = document.getElementById('totalDonatedAmount');
 
     profileRef.on('value', (snapshot) => {
         const user = snapshot.val();
@@ -393,17 +389,21 @@ async function loadUserProfile(uid) {
                 <button class="btn btn-secondary mt-3" onclick="openEditProfileModal()">Edit Profile</button>
             `;
             
+            // Display Total Donation Amount
+            totalDonated.textContent = `कुल दान: ₹${(user.totalDonated || 0).toFixed(2)}`;
+
             // Membership Badge Logic
             const isPremium = user.membership === 'Premium';
             badgeArea.innerHTML = isPremium 
                 ? `<div class="premium-badge">Goshala Premium Member <i data-lucide="star"></i></div>`
                 : `<div class="non-member-status">Not a Premium Member. <button class="btn-link" onclick="showPage('membership')">Join Now</button></div>`;
-             lucide.createIcons(); // Re-render icons after adding HTML
+             lucide.createIcons();
         }
     });
 
     // Edit Profile Modal function
     window.openEditProfileModal = function() {
+        const user = profileRef.toJSON(); // Get current user data
         const newName = prompt("Enter new Name:", user.name || '');
         const newMobile = prompt("Enter new Mobile:", user.mobile || '');
         const newAddress = prompt("Enter new Address:", user.address || '');
@@ -417,18 +417,78 @@ async function loadUserProfile(uid) {
 }
 
 async function loadDonationHistory(uid) {
-    // ... [Logic to load and display history, filtering by status='Approved' and donorId=uid]
+    const historyList = document.getElementById('donationHistoryList');
+    // Order by timestamp and filter by the current user's ID
+    const donorHistoryRef = database.ref('donations').orderByChild('donorId').equalTo(uid);
+    
+    donorHistoryRef.once('value', (snapshot) => {
+        if (!snapshot.exists()) {
+            historyList.innerHTML = "<p>अभी तक कोई दान नहीं दिया गया है।</p>";
+            return;
+        }
+
+        let historyHTML = '';
+        snapshot.forEach(child => {
+            const donation = child.val();
+            const date = new Date(donation.timestamp).toLocaleDateString('hi-IN');
+            
+            // Status styling
+            const statusClass = donation.status === 'Approved' ? 'text-primary' : 'text-secondary';
+
+            historyHTML += `
+                <div class="donation-item section-card">
+                    <p><strong>राशि:</strong> ₹${donation.amount}</p>
+                    <p><strong>तारीख:</strong> ${date}</p>
+                    <p><strong>प्रकार:</strong> ${donation.type}</p>
+                    <p class="status-indicator ${statusClass}"><strong>स्थिति:</strong> ${donation.status}</p>
+                </div>
+            `;
+        });
+
+        historyList.innerHTML = historyHTML;
+    });
 }
 
 
-// 8. DYNAMIC CONTENT LOADING (Top Donors & Content Snippets)
+// --------------------------------------------------------------------------
+// 6. DYNAMIC CONTENT LOADING (Top Donors & Content Snippets)
 // --------------------------------------------------------------------------
 
 function loadTopDonors() {
-    // ... [Logic to fetch and display Top 30 donors with infinite scroll animation]
+    // This function needs to fetch and display data dynamically.
+    const sliderContainer = document.getElementById('topDonorsSlider');
+    sliderContainer.innerHTML = '<p style="padding: 0 10px;">Loading donors list...</p>';
+
+    // Fetch up to 30 donors who are not anonymous and are approved
+    database.ref('donations')
+        .orderByChild('status')
+        .equalTo('Approved')
+        .limitToLast(30)
+        .once('value', (snapshot) => {
+            let donorCardsHTML = '';
+            snapshot.forEach(child => {
+                const donation = child.val();
+                if (!donation.isAnonymous) {
+                    // Placeholder for image, replace with user uploaded image if available in storage later
+                    const imageUrl = `https://placehold.co/60x60/FF9800/ffffff?text=${donation.donorName[0]}`;
+                    donorCardsHTML += `
+                        <div class="donor-card">
+                            <img src="${imageUrl}" alt="${donation.donorName}">
+                            <p>${donation.donorName}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            if (donorCardsHTML) {
+                // Duplicate content for smooth infinite scrolling effect
+                sliderContainer.innerHTML = donorCardsHTML + donorCardsHTML;
+            } else {
+                sliderContainer.innerHTML = '<p style="padding: 0 10px;">अभी तक कोई दानकर्ता उपलब्ध नहीं है।</p>';
+            }
+        });
 }
 
 window.onload = function() {
     loadTopDonors();
-    // Load Events/Blogs snippets from /content/events, /content/blogs
 };
