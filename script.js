@@ -31,7 +31,8 @@ try {
 // Global Variables
 let currentUserId = null;
 let currentMembershipStatus = 'None';
-const VPA = "yourgoshala@upi"; // <--- गौशाला का VPA यहाँ बदलें (e.g., upi@bank)
+// NEW VPA based on Bank Account Details: Account No.: 46870200000024, IFSC: BARB0BRGBXX
+const VPA = "46870200000024@BARB0BRGBXX.bank"; 
 
 
 // --------------------------------------------------------------------------
@@ -129,7 +130,7 @@ window.handlePasswordReset = async function() {
 }
 
 
-// --- D. Auth State Listener & Logout (FIXED LOGOUT VISIBILITY) ---
+// --- D. Auth State Listener & Logout (FIXED LOGOUT) ---
 
 firebase.auth().onAuthStateChanged((user) => {
     const loginBtn = document.getElementById('loginBtn');
@@ -143,6 +144,7 @@ firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         currentUserId = user.uid;
         
+        // Fetch user data once for initial load and set global state
         database.ref('users/' + user.uid).once('value', (snapshot) => {
             const userData = snapshot.val();
             if (userData) {
@@ -185,11 +187,17 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
+// FIX: Logout is now working correctly
 window.logoutUser = async function() {
-    await auth.signOut();
-    alert("आप सफलतापूर्वक लॉगआउट हो गए हैं।");
-    lucide.createIcons(); 
-    showPage('home');
+    try {
+        await auth.signOut();
+        alert("आप सफलतापूर्वक लॉगआउट हो गए हैं।");
+        // UI updates automatically via onAuthStateChanged listener
+        showPage('home');
+    } catch (error) {
+        console.error("Logout Error:", error);
+        alert("लॉगआउट में त्रुटि: " + error.message);
+    }
 }
 
 
@@ -197,16 +205,16 @@ window.logoutUser = async function() {
 // 3. SINGLE PAGE APPLICATION (SPA) NAVIGATION & UI LOGIC
 // --------------------------------------------------------------------------
 
-// FIX: Function to show the Login Modal
+// FIX: Function to show the Login Modal (Working activation)
 window.showLoginModal = function() {
     const modal = document.getElementById('loginModal');
     modal.classList.add('active');
     
-    // Default to Login tab, or check if email exists in local storage
+    // Default to Login tab
     switchAuthTab('login');
 }
 
-// FIX: Function to hide the Login Modal
+// FIX: Function to hide the Login Modal (Working deactivation)
 window.hideLoginModal = function() {
     document.getElementById('loginModal').classList.remove('active');
 }
@@ -221,7 +229,7 @@ window.switchAuthTab = function(tabId) {
     document.getElementById(tabId + 'TabContent').classList.add('active');
 }
 
-// Main Navigation Function
+// Main Navigation Function (Handles scroll to section)
 window.showPage = function(pageId) {
     // 1. Handle Login/Signup Modal Display
     if (pageId === 'login') {
@@ -247,8 +255,11 @@ window.showPage = function(pageId) {
         targetSection.classList.add('active');
     }
     
-    // 3. Update URL hash
+    // 3. Update URL hash & smooth scroll to the section (FIXED SCROLLING)
     window.location.hash = pageId;
+    if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     // 4. Highlight active link and CLOSE MOBILE MENU
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -297,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 4. DONATION LOGIC (General Donation)
 // --------------------------------------------------------------------------
 
-// Function to generate Dynamic QR Code
+// Function to generate Dynamic QR Code (Uses updated VPA)
 window.generateQRCode = function() {
     const amount = document.getElementById('donationAmount').value;
     const qrContainer = document.getElementById('qrcodeContainer');
@@ -307,6 +318,7 @@ window.generateQRCode = function() {
         return;
     }
 
+    // UPI Link uses Bank Details for VPA
     const upiLink = `upi://pay?pa=${VPA}&pn=GaushalaSingnor&am=${amount}&tn=Donation${Date.now()}`;
 
     qrContainer.innerHTML = ''; 
@@ -335,7 +347,7 @@ document.getElementById('donationForm').addEventListener('submit', async functio
 
     const name = document.getElementById('donorName').value;
     const mobile = document.getElementById('donorMobile').value;
-    const txId = document = document.getElementById('transactionId').value;
+    const txId = document.getElementById('transactionId').value;
     const amount = document.getElementById('donationAmount').value;
     const screenshotFile = document.getElementById('screenshotUpload').files[0];
     const isAnonymous = document.getElementById('isAnonymous').checked;
@@ -460,23 +472,22 @@ window.handleMembershipSubmission = async function(e) {
 
         // 1. Upload Payment Screenshot
         const payRef = storage.ref(`screenshots/member_pay_${txId}_${Date.now()}`);
-        paymentURL = (await payRef.put(paymentFile)).ref.getDownloadURL();
+        const paySnapshot = await payRef.put(paymentFile);
+        paymentURL = await paySnapshot.ref.getDownloadURL();
 
         // 2. Upload User Photo
         const photoRef = storage.ref(`member_photos/${currentUserId}_${Date.now()}`);
-        photoURL = (await photoRef.put(userPhotoFile)).ref.getDownloadURL();
-
-        // Wait for both URLs
-        const [finalPaymentURL, finalPhotoURL] = await Promise.all([paymentURL, photoURL]);
+        const photoSnapshot = await photoRef.put(userPhotoFile);
+        photoURL = await photoSnapshot.ref.getDownloadURL();
         
-        // 3. Save Membership Data to RTDB (Pending)
+        // 3. Save Membership Data to RTDB (Pending) - Goes to donations section for admin to view
         const newMemberRef = database.ref('donations').push();
         await newMemberRef.set({
             donorName: name,
             amount: parseFloat(amount),
             transactionId: txId,
-            paymentURL: finalPaymentURL,
-            userPhotoURL: finalPhotoURL,
+            paymentURL: paymentURL,
+            userPhotoURL: photoURL,
             timestamp: new Date().toISOString(),
             status: 'Pending Membership', 
             type: type + ' Membership', 
@@ -484,10 +495,11 @@ window.handleMembershipSubmission = async function(e) {
             donationID: newMemberRef.key 
         });
 
-        // 4. Update User Profile with Pending Photo (Optional)
+        // 4. Update User Profile with Pending Photo and Status
         await database.ref('users/' + currentUserId).update({
-            profilePhotoURL: finalPhotoURL,
-            membership: 'Pending'
+            profilePhotoURL: photoURL,
+            membership: 'Pending',
+            // Placeholder: Expiry date calculation would be here once confirmed by admin
         });
 
 
@@ -554,9 +566,16 @@ async function loadUserProfile(uid) {
 
             // Membership Badge Logic
             const isPremium = user.membership === 'Premium';
-            badgeArea.innerHTML = isPremium 
-                ? `<div class="premium-badge">Goshala Premium Member <i data-lucide="star"></i></div>`
-                : `<div class="non-member-status">Not a Premium Member. <button class="btn-link" onclick="showPage('membership')">Join Now</button></div>`;
+            const isPending = user.membership === 'Pending';
+
+            if (isPremium) {
+                 badgeArea.innerHTML = `<div class="premium-badge">Goshala Premium Member <i data-lucide="star"></i></div>`;
+            } else if (isPending) {
+                 badgeArea.innerHTML = `<div class="non-member-status status-indicator text-secondary">Membership: Pending Approval</div>`;
+            } else {
+                 badgeArea.innerHTML = `<div class="non-member-status">Not a Premium Member. <button class="btn-link" onclick="showPage('membership')">Join Now</button></div>`;
+            }
+
              lucide.createIcons();
         }
     });
@@ -593,7 +612,7 @@ async function loadDonationHistory(uid) {
             const date = new Date(donation.timestamp).toLocaleDateString('hi-IN');
             
             // Status styling
-            const statusClass = donation.status === 'Approved' ? 'text-primary' : (donation.status === 'Pending Verification' ? 'text-secondary' : 'text-danger');
+            const statusClass = donation.status === 'Approved' || donation.status === 'Premium' ? 'text-primary' : (donation.status.includes('Pending') ? 'text-secondary' : 'text-danger');
 
             historyHTML += `
                 <div class="donation-item section-card">
@@ -647,11 +666,22 @@ function loadTopDonors() {
         });
 }
 
-// Contact Form Submission (Simple Alert for demonstration)
+// Contact Form Submission (Uses mailto for free submission)
 window.handleContactFormSubmission = function(e) {
     e.preventDefault();
+    const name = document.getElementById('contactName').value;
+    const email = document.getElementById('contactEmail').value;
+    const message = document.getElementById('contactMessage').value;
+
+    const subject = `New Contact Form Submission from ${name}`;
+    const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
+
+    // Use mailto: for free email submission
+    window.location.href = `mailto:ys0224379@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
     document.getElementById('contactForm').reset();
-    alert("आपका संदेश गौशाला प्रबंधन को सफलतापूर्वक भेज दिया गया है। धन्यवाद!");
+    // Alert is replaced by the mailto action itself, but keeping for confirmation
+    alert("आपका संदेश ईमेल ऐप में खुल गया है। कृपया भेजने के लिए 'Send' पर क्लिक करें।");
 };
 
 
