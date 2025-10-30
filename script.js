@@ -48,6 +48,14 @@ window.handleSignup = async function(e) {
     const password = document.getElementById('signupPassword').value;
 
     try {
+        // FIX: Check if the user already exists to prevent duplicate creation attempts
+        const methods = await auth.fetchSignInMethodsForEmail(email);
+        if (methods && methods.length > 0) {
+            alert("यह ईमेल पहले से पंजीकृत है। कृपया लॉगिन करें या किसी अन्य ईमेल का उपयोग करें।");
+            switchAuthTab('login');
+            return;
+        }
+
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         
         await database.ref('users/' + userCredential.user.uid).set({
@@ -62,7 +70,7 @@ window.handleSignup = async function(e) {
         });
         alert("पंजीकरण सफल! Welcome " + name + "!");
         document.getElementById('signupForm').reset(); 
-        hideLoginModal(); // Hide modal on success
+        hideLoginModal(); 
         showPage('profile');
     } catch (error) {
         alert("पंजीकरण में त्रुटि: " + error.message);
@@ -78,7 +86,7 @@ window.handleLogin = async function(e) {
         await auth.signInWithEmailAndPassword(email, password);
         alert("लॉगिन सफल!");
         document.getElementById('loginForm').reset(); 
-        hideLoginModal(); // Hide modal on success
+        hideLoginModal(); 
         showPage('home');
     } catch (error) {
         if (error.code === 'auth/user-not-found') {
@@ -109,7 +117,7 @@ window.signInWithGoogle = async function() {
             });
         }
         alert("Google लॉगिन सफल!");
-        hideLoginModal(); // Hide modal on success
+        hideLoginModal(); 
         showPage('home');
     } catch (error) {
         alert("Google लॉगिन में त्रुटि: " + error.message);
@@ -144,7 +152,6 @@ firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         currentUserId = user.uid;
         
-        // Fetch user data once for initial load and set global state
         database.ref('users/' + user.uid).once('value', (snapshot) => {
             const userData = snapshot.val();
             if (userData) {
@@ -192,7 +199,7 @@ window.logoutUser = async function() {
     try {
         await auth.signOut();
         alert("आप सफलतापूर्वक लॉगआउट हो गए हैं।");
-        // UI updates automatically via onAuthStateChanged listener
+        // onAuthStateChanged handles UI update automatically
         showPage('home');
     } catch (error) {
         console.error("Logout Error:", error);
@@ -214,7 +221,7 @@ window.showLoginModal = function() {
     switchAuthTab('login');
 }
 
-// FIX: Function to hide the Login Modal (Working deactivation)
+// FIX: Function to hide the Login Modal
 window.hideLoginModal = function() {
     document.getElementById('loginModal').classList.remove('active');
 }
@@ -258,7 +265,10 @@ window.showPage = function(pageId) {
     // 3. Update URL hash & smooth scroll to the section (FIXED SCROLLING)
     window.location.hash = pageId;
     if (targetSection) {
-        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Using setTimeout to allow the page section visibility change to render before scrolling
+        setTimeout(() => {
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100); 
     }
 
     // 4. Highlight active link and CLOSE MOBILE MENU
@@ -297,6 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageId = window.location.hash.substring(1) || 'home';
     showPage(pageId);
     
+    // Attach event listeners to forms
     document.getElementById('loginForm').addEventListener('submit', window.handleLogin);
     document.getElementById('signupForm').addEventListener('submit', window.handleSignup);
     document.getElementById('membershipForm').addEventListener('submit', window.handleMembershipSubmission);
@@ -308,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 4. DONATION LOGIC (General Donation)
 // --------------------------------------------------------------------------
 
-// Function to generate Dynamic QR Code (Uses updated VPA)
+// Function to generate Dynamic QR Code
 window.generateQRCode = function() {
     const amount = document.getElementById('donationAmount').value;
     const qrContainer = document.getElementById('qrcodeContainer');
@@ -318,7 +329,6 @@ window.generateQRCode = function() {
         return;
     }
 
-    // UPI Link uses Bank Details for VPA
     const upiLink = `upi://pay?pa=${VPA}&pn=GaushalaSingnor&am=${amount}&tn=Donation${Date.now()}`;
 
     qrContainer.innerHTML = ''; 
@@ -479,7 +489,7 @@ window.handleMembershipSubmission = async function(e) {
         const photoRef = storage.ref(`member_photos/${currentUserId}_${Date.now()}`);
         const photoSnapshot = await photoRef.put(userPhotoFile);
         photoURL = await photoSnapshot.ref.getDownloadURL();
-        
+
         // 3. Save Membership Data to RTDB (Pending) - Goes to donations section for admin to view
         const newMemberRef = database.ref('donations').push();
         await newMemberRef.set({
@@ -582,16 +592,19 @@ async function loadUserProfile(uid) {
 
     // Edit Profile Modal function
     window.openEditProfileModal = function() {
-        const user = profileRef.toJSON(); // Get current user data
-        const newName = prompt("Enter new Name:", firebase.auth().currentUser.displayName || '');
-        const newMobile = prompt("Enter new Mobile:", user.mobile || '');
-        const newAddress = prompt("Enter new Address:", user.address || '');
+        // Get user data directly from Firebase Auth or RTDB (assuming RTDB is faster for these small values)
+        profileRef.once('value', (snapshot) => {
+            const user = snapshot.val();
+            const newName = prompt("Enter new Name:", user.name || '');
+            const newMobile = prompt("Enter new Mobile:", user.mobile || '');
+            const newAddress = prompt("Enter new Address:", user.address || '');
 
-        if (newName && newMobile && newAddress) {
-            profileRef.update({ name: newName, mobile: newMobile, address: newAddress })
-                .then(() => alert("Profile updated successfully!"))
-                .catch(err => console.error("Update error:", err));
-        }
+            if (newName && newMobile && newAddress) {
+                profileRef.update({ name: newName, mobile: newMobile, address: newAddress })
+                    .then(() => alert("Profile updated successfully!"))
+                    .catch(err => console.error("Update error:", err));
+            }
+        });
     }
 }
 
@@ -612,7 +625,7 @@ async function loadDonationHistory(uid) {
             const date = new Date(donation.timestamp).toLocaleDateString('hi-IN');
             
             // Status styling
-            const statusClass = donation.status === 'Approved' || donation.status === 'Premium' ? 'text-primary' : (donation.status.includes('Pending') ? 'text-secondary' : 'text-danger');
+            const statusClass = donation.status === 'Approved' ? 'text-primary' : (donation.status.includes('Pending') ? 'text-secondary' : 'text-danger');
 
             historyHTML += `
                 <div class="donation-item section-card">
@@ -629,7 +642,7 @@ async function loadDonationHistory(uid) {
 
 
 // --------------------------------------------------------------------------
-// 7. DYNAMIC CONTENT LOADING (Top Donors)
+// 7. DYNAMIC CONTENT LOADING (Top Donors & Contact Form Submission)
 // --------------------------------------------------------------------------
 
 function loadTopDonors() {
@@ -676,11 +689,10 @@ window.handleContactFormSubmission = function(e) {
     const subject = `New Contact Form Submission from ${name}`;
     const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
 
-    // Use mailto: for free email submission
+    // Use mailto: for free email submission to ys0224379@gmail.com
     window.location.href = `mailto:ys0224379@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     document.getElementById('contactForm').reset();
-    // Alert is replaced by the mailto action itself, but keeping for confirmation
     alert("आपका संदेश ईमेल ऐप में खुल गया है। कृपया भेजने के लिए 'Send' पर क्लिक करें।");
 };
 
