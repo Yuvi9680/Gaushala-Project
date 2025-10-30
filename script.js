@@ -49,7 +49,6 @@ window.handleSignup = async function(e) {
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         
-        // Save initial user data to Realtime Database
         await database.ref('users/' + userCredential.user.uid).set({
             name: name,
             email: email,
@@ -58,10 +57,11 @@ window.handleSignup = async function(e) {
             membership: 'None', 
             createdAt: new Date().toISOString(),
             totalDonated: 0,
-            profilePhotoURL: 'N/A' // Placeholder for photo
+            profilePhotoURL: 'N/A' 
         });
         alert("पंजीकरण सफल! Welcome " + name + "!");
-        document.getElementById('signupForm').reset(); // Form Reset
+        document.getElementById('signupForm').reset(); 
+        hideLoginModal(); // Hide modal on success
         showPage('profile');
     } catch (error) {
         alert("पंजीकरण में त्रुटि: " + error.message);
@@ -76,10 +76,10 @@ window.handleLogin = async function(e) {
     try {
         await auth.signInWithEmailAndPassword(email, password);
         alert("लॉगिन सफल!");
-        document.getElementById('loginForm').reset(); // Form Reset
+        document.getElementById('loginForm').reset(); 
+        hideLoginModal(); // Hide modal on success
         showPage('home');
     } catch (error) {
-        // Smart Auth Logic: If user not found, redirect to signup automatically
         if (error.code === 'auth/user-not-found') {
             alert("यह ईमेल पंजीकृत नहीं है। कृपया साइनअप करें।");
             switchAuthTab('signup');
@@ -95,7 +95,6 @@ window.signInWithGoogle = async function() {
     try {
         const result = await auth.signInWithPopup(provider);
         
-        // Check if user is new, then create profile data
         if (result.additionalUserInfo.isNewUser) {
             await database.ref('users/' + result.user.uid).set({
                 name: result.user.displayName,
@@ -105,10 +104,11 @@ window.signInWithGoogle = async function() {
                 membership: 'None',
                 createdAt: new Date().toISOString(),
                 totalDonated: 0,
-                profilePhotoURL: result.user.photoURL || 'N/A' // Use Google Photo if available
+                profilePhotoURL: result.user.photoURL || 'N/A' 
             });
         }
         alert("Google लॉगिन सफल!");
+        hideLoginModal(); // Hide modal on success
         showPage('home');
     } catch (error) {
         alert("Google लॉगिन में त्रुटि: " + error.message);
@@ -134,6 +134,9 @@ window.handlePasswordReset = async function() {
 firebase.auth().onAuthStateChanged((user) => {
     const loginBtn = document.getElementById('loginBtn');
     const profileBtnContainer = document.getElementById('profileBtnContainer');
+    const mobileLoginLink = document.getElementById('mobileLoginLink');
+    const mobileProfileLink = document.getElementById('mobileProfileLink');
+    const mobileLogoutLink = document.getElementById('mobileLogoutLink');
     const profilePhotoNav = document.getElementById('profilePhotoNav');
     const profileNameNav = document.getElementById('profileNameNav');
     
@@ -154,16 +157,29 @@ firebase.auth().onAuthStateChanged((user) => {
             }
         });
 
+        // Desktop UI
         loginBtn.style.display = 'none';
-        profileBtnContainer.style.display = 'flex'; // Use flex for better layout
+        profileBtnContainer.style.display = 'flex'; 
+
+        // Mobile UI
+        mobileLoginLink.style.display = 'none';
+        mobileProfileLink.style.display = 'block';
+        mobileLogoutLink.style.display = 'block';
         
         loadTopDonors(); 
 
     } else {
         currentUserId = null;
         currentMembershipStatus = 'None';
+
+        // Desktop UI
         loginBtn.style.display = 'inline-flex';
         profileBtnContainer.style.display = 'none';
+        
+        // Mobile UI
+        mobileLoginLink.style.display = 'block';
+        mobileProfileLink.style.display = 'none';
+        mobileLogoutLink.style.display = 'none';
         
         loadTopDonors();
     }
@@ -181,6 +197,22 @@ window.logoutUser = async function() {
 // 3. SINGLE PAGE APPLICATION (SPA) NAVIGATION & UI LOGIC
 // --------------------------------------------------------------------------
 
+// Function to show the Login Modal
+window.showLoginModal = function() {
+    const modal = document.getElementById('loginModal');
+    modal.classList.add('active');
+    
+    // Default to Login tab, or check if email exists in local storage
+    // For simplicity, default to Login.
+    switchAuthTab('login');
+}
+
+// Function to hide the Login Modal
+window.hideLoginModal = function() {
+    document.getElementById('loginModal').classList.remove('active');
+}
+
+
 // Function to switch between Login and Signup tabs
 window.switchAuthTab = function(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -192,27 +224,47 @@ window.switchAuthTab = function(tabId) {
 
 // Main Navigation Function
 window.showPage = function(pageId) {
+    // 1. Hide all sections
     document.querySelectorAll('.page-section').forEach(section => {
         section.classList.remove('active');
     });
 
+    // 2. Handle Login/Signup Modal Display
+    if (pageId === 'login') {
+        if (currentUserId) {
+            // If logged in, redirect to profile instead of showing modal
+            pageId = 'profile'; 
+            window.location.hash = pageId;
+        } else {
+            // Show the modal
+            showLoginModal();
+            return; 
+        }
+    } else {
+        // Hide modal if navigating to any other page
+        hideLoginModal();
+    }
+
+
+    // 3. Show target section
     const targetSection = document.getElementById(pageId);
     if (targetSection) {
         targetSection.classList.add('active');
     }
     window.location.hash = pageId;
 
-    // Highlight active link in header AND close mobile menu
+    // 4. Highlight active link and CLOSE MOBILE MENU
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('data-page') === pageId) {
             link.classList.add('active');
         }
-        // Fix: Close mobile menu on any link click
-        document.getElementById('mainNav').classList.remove('open');
     });
+    // Close mobile menu on any link click (Fix)
+    document.getElementById('mainNav').classList.remove('open');
 
-    // Load page-specific content
+
+    // 5. Load page-specific content
     if (pageId === 'profile' && currentUserId) {
         loadUserProfile(currentUserId);
         loadDonationHistory(currentUserId);
@@ -352,7 +404,7 @@ document.getElementById('donationForm').addEventListener('submit', async functio
 window.selectMembership = function(type, amount) {
     if (!currentUserId) {
         alert("कृपया पहले लॉगिन या साइनअप करें।");
-        showPage('login');
+        showPage('login'); // Will open modal
         return;
     }
     
@@ -445,7 +497,7 @@ window.handleMembershipSubmission = async function(e) {
         document.getElementById('membershipInputs').style.display = 'none';
         document.getElementById('membershipThankYouScreen').style.display = 'block';
         
-        document.getElementById('membershipForm').reset(); 
+        document.getElementById('membershipForm').reset(); // Form Reset
 
     } catch (error) {
         console.error("Membership Submission Error:", error);
@@ -501,7 +553,8 @@ async function loadUserProfile(uid) {
             profilePhotoLarge.src = photoUrl;
             document.getElementById('profilePhotoNav').src = photoUrl;
 
-           // Membership Badge Logic
+
+            // Membership Badge Logic
             const isPremium = user.membership === 'Premium';
             badgeArea.innerHTML = isPremium 
                 ? `<div class="premium-badge">Goshala Premium Member <i data-lucide="star"></i></div>`
@@ -512,7 +565,7 @@ async function loadUserProfile(uid) {
 
     // Edit Profile Modal function
     window.openEditProfileModal = function() {
-        // Simple prompt for mobile environment
+        const user = profileRef.toJSON(); // Get current user data
         const newName = prompt("Enter new Name:", firebase.auth().currentUser.displayName || '');
         const newMobile = prompt("Enter new Mobile:", user.mobile || '');
         const newAddress = prompt("Enter new Address:", user.address || '');
@@ -599,4 +652,3 @@ function loadTopDonors() {
 window.onload = function() {
     loadTopDonors();
 };
-             
