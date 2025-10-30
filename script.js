@@ -153,7 +153,7 @@ firebase.auth().onAuthStateChanged((user) => {
 
                 profileNameNav.textContent = userData.name || 'Profile';
                 profilePhotoNav.src = photoUrl;
-                document.getElementById('profilePhotoLarge').src = photoUrl; // Update large photo
+                document.getElementById('profilePhotoLarge').src = photoUrl; 
             }
         });
 
@@ -197,17 +197,16 @@ window.logoutUser = async function() {
 // 3. SINGLE PAGE APPLICATION (SPA) NAVIGATION & UI LOGIC
 // --------------------------------------------------------------------------
 
-// Function to show the Login Modal
+// FIX: Function to show the Login Modal (Fixed activation logic)
 window.showLoginModal = function() {
     const modal = document.getElementById('loginModal');
     modal.classList.add('active');
     
     // Default to Login tab, or check if email exists in local storage
-    // For simplicity, default to Login.
     switchAuthTab('login');
 }
 
-// Function to hide the Login Modal
+// FIX: Function to hide the Login Modal
 window.hideLoginModal = function() {
     document.getElementById('loginModal').classList.remove('active');
 }
@@ -229,7 +228,7 @@ window.showPage = function(pageId) {
         section.classList.remove('active');
     });
 
-    // 2. Handle Login/Signup Modal Display
+    // 2. Handle Login/Signup Modal Display (FIXED LOGIC)
     if (pageId === 'login') {
         if (currentUserId) {
             // If logged in, redirect to profile instead of showing modal
