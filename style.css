@@ -1,0 +1,522 @@
+/* -------------------------------------------------------------------------- */
+/* Global Reset and Typography */
+/* -------------------------------------------------------------------------- */
+:root {
+    --color-primary: #4CAF50;    /* गौशाला हरा */
+    --color-secondary: #FF9800;  /* दानकर्ता ऑरेंज */
+    --color-background: #f8f9fa;
+    --color-surface: #ffffff;
+    --color-text: #333333;
+    --color-light-text: #777;
+    --font-heading: 'Inter', sans-serif;
+    --font-body: 'Noto Sans Devanagari', sans-serif;
+    --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Global Smooth Transition */
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-background);
+    line-height: 1.6;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* -------------------------------------------------------------------------- */
+/* Utility Classes */
+/* -------------------------------------------------------------------------- */
+.page-title {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    color: var(--color-primary);
+    margin-bottom: 20px;
+    border-bottom: 3px solid var(--color-secondary);
+    padding-bottom: 10px;
+    font-weight: 800;
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+/* Card Styling */
+.section-card, .profile-card {
+    background: var(--color-surface);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 25px;
+    transform: perspective(1000px); /* Enable 3D context */
+}
+
+/* -------------------------------------------------------------------------- */
+/* Buttons and Forms */
+/* -------------------------------------------------------------------------- */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary, .btn-cta {
+    background-color: var(--color-primary);
+    color: var(--color-surface);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+.btn-primary:hover, .btn-cta:hover {
+    background-color: #66bb6a;
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px); /* Smooth hover effect */
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-surface);
+}
+
+.btn-secondary:hover {
+    background-color: #ffb74d;
+    transform: scale(1.05);
+}
+
+/* Forms */
+input[type="text"], input[type="number"], input[type="tel"], input[type="date"], input[type="password"], .file-input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--color-text);
+    transition: border-color 0.3s;
+}
+
+input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    outline: none;
+}
+
+.animated-form {
+    transform: rotateX(0);
+    opacity: 1;
+    animation: fadeInForm 0.8s ease-out;
+}
+
+@keyframes fadeInForm {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Header and Navigation (Sticky, Smooth) */
+/* -------------------------------------------------------------------------- */
+.sticky-header {
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-light);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 10px 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    /* 3D Logo Effect */
+    transform: rotateY(0deg);
+    transition: transform 0.6s ease;
+}
+.logo:hover {
+    transform: rotateY(15deg) scale(1.05);
+}
+
+.text-logo {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+#mainNav {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-link {
+    color: var(--color-text);
+    text-decoration: none;
+    padding: 8px 0;
+    position: relative;
+    font-weight: 600;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 3px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--color-secondary);
+    transition: width 0.3s ease-out;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    width: 100%;
+}
+
+.menu-toggle-btn {
+    display: none; /* Hide on desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main Content and Layout */
+/* -------------------------------------------------------------------------- */
+#appContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 80vh;
+}
+
+.page-section {
+    padding: 40px 0;
+    display: none; /* Controlled by script.js (SPA logic) */
+    animation: fadeIn 0.8s ease-out;
+}
+
+.page-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Home Section Layout */
+.hero-section {
+    background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+    padding: 50px 30px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.hero-title {
+    font-size: 3rem;
+    color: var(--color-primary);
+    margin-bottom: 10px;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--color-light-text);
+    margin-bottom: 25px;
+}
+
+/* Contact Strip (Animated on Load) */
+.contact-strip {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--color-primary);
+    color: var(--color-surface);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-hover);
+}
+
+.contact-item {
+    color: var(--color-surface);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.contact-item:hover {
+    opacity: 1;
+    transform: scale(1.03);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Donor Slider (Moving Animation) */
+/* -------------------------------------------------------------------------- */
+.donor-slider {
+    display: flex;
+    overflow-x: hidden; /* Hide scrollbar */
+    padding: 10px 0;
+    white-space: nowrap; /* Prevent wrapping */
+    border-radius: 10px;
+    background: #f1f8e9;
+    border: 1px solid #e0e0e0;
+}
+
+/* Keyframe for moving right to left */
+@keyframes slideDonors {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); } /* Move off-screen */
+}
+
+.donor-card {
+    display: inline-block;
+    min-width: 150px;
+    text-align: center;
+    margin-right: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-light);
+    animation: slideDonors 60s linear infinite; /* Apply the animation */
+}
+
+.donor-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 5px;
+    border: 3px solid var(--color-secondary);
+}
+
+/* Pause animation on hover */
+.donor-slider:hover .donor-card {
+    animation-play-state: paused;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Donation Section Styles */
+/* -------------------------------------------------------------------------- */
+.qr-container {
+    text-align: center;
+    padding: 20px;
+    margin: 20px 0;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.qr-container canvas {
+    border: 5px solid var(--color-surface);
+    box-shadow: var(--shadow-hover);
+    margin: 10px 0;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.thankyou-screen {
+    text-align: center;
+    padding: 50px;
+    background: #e8f5e9;
+    border-radius: 15px;
+    box-shadow: var(--shadow-hover);
+}
+
+/* Success Animation (CSS-based) */
+.success-animation {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    position: relative;
+    animation: bounceIn 0.5s ease-out;
+}
+
+.success-animation::after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 60px;
+    border: solid var(--color-surface);
+    border-width: 0 8px 8px 0;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 15px;
+    left: 35px;
+    animation: checkMark 0.5s ease-in-out 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes checkMark {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Footer */
+/* -------------------------------------------------------------------------- */
+#footer {
+    background-color: var(--color-text);
+    color: #e0e0e0;
+    padding: 40px 20px 10px;
+    font-size: 0.9rem;
+}
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto 30px;
+}
+
+.footer-col {
+    flex-basis: 22%; /* 4 columns on desktop */
+    min-width: 150px; /* Minimum width for responsiveness */
+    margin-bottom: 20px;
+}
+
+.footer-col h4 {
+    color: var(--color-surface);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    position: relative;
+}
+
+.footer-col h4::after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 2px;
+    background: var(--color-secondary);
+    margin-top: 5px;
+}
+
+.footer-col a, .footer-col p {
+    display: block;
+    color: #bdbdbd;
+    text-decoration: none;
+    margin-bottom: 8px;
+}
+
+.footer-col a:hover {
+    color: var(--color-primary);
+    transform: translateX(5px);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+    color: #9e9e9e;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive Design (Mobile First) */
+/* -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    /* General Adjustments */
+    .hero-title {
+        font-size: 2rem;
+    }
+    .page-title {
+        font-size: 1.8rem;
+    }
+    
+    /* Header/Navigation */
+    .header-content {
+        padding: 10px 0;
+    }
+    .text-logo {
+        font-size: 1rem;
+    }
+
+    #mainNav {
+        display: none; /* Hide main nav on mobile */
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        background: var(--color-surface);
+        box-shadow: var(--shadow-hover);
+        padding: 10px 20px;
+    }
+    #mainNav.open {
+        display: flex;
+    }
+    .menu-toggle-btn {
+        display: block; /* Show menu button on mobile */
+    }
+    .auth-buttons {
+        display: none; /* Can be moved inside the toggle menu if needed */
+    }
+
+    /* Contact Strip */
+    .contact-strip {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    /* Footer */
+    .footer-content {
+        flex-direction: column;
+    }
+    .footer-col {
+        flex-basis: 100%;
+        min-width: auto;
+    }
+}
